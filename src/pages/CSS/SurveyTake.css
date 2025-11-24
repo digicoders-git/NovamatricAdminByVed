@@ -1,0 +1,235 @@
+ .take-survey-loading {
+     min-height: 100vh;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     background: #f8f9fa;
+ }
+
+ .take-survey-spinner {
+     width: 40px;
+     height: 40px;
+     border: 3px solid #e9ecef;
+     border-top-color: #4f46e5;
+     border-radius: 50%;
+     animation: take-survey-spin 0.8s linear infinite;
+ }
+
+ @keyframes take-survey-spin {
+     to {
+         transform: rotate(360deg);
+     }
+ }
+
+ .take-survey-error {
+     min-height: 100vh;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     background: #f8f9fa;
+     padding: 20px;
+ }
+
+ .take-survey-error-text {
+     font-size: 18px;
+     color: #6c757d;
+ }
+
+ .take-survey-container {
+     min-height: 100vh;
+     background: #f8f9fa;
+     padding: 40px 20px;
+ }
+
+ .take-survey-form {
+     max-width: 700px;
+     margin: 0 auto;
+     background: white;
+     border-radius: 8px;
+     border: 1px solid #e9ecef;
+     overflow: hidden;
+ }
+
+ .take-survey-header {
+     padding: 32px 32px 24px;
+     border-bottom: 1px solid #e9ecef;
+ }
+
+ .take-survey-title {
+     font-size: 24px;
+     font-weight: 600;
+     color: #212529;
+     margin-bottom: 8px;
+ }
+
+ .take-survey-description {
+     font-size: 14px;
+     color: #6c757d;
+     line-height: 1.5;
+ }
+
+ .take-survey-body {
+     padding: 24px 32px 32px;
+ }
+
+ .take-survey-question {
+     margin-bottom: 32px;
+ }
+
+ .take-survey-question:last-child {
+     margin-bottom: 24px;
+ }
+
+ .take-survey-question-label {
+     font-size: 15px;
+     font-weight: 500;
+     color: #212529;
+     margin-bottom: 12px;
+     display: block;
+ }
+
+ .take-survey-input {
+     width: 100%;
+     padding: 10px 12px;
+     font-size: 14px;
+     border: 1px solid #dee2e6;
+     border-radius: 6px;
+     transition: border-color 0.2s;
+ }
+
+ .take-survey-input:focus {
+     outline: none;
+     border-color: #4f46e5;
+ }
+
+ .take-survey-rating {
+     display: flex;
+     gap: 8px;
+ }
+
+ .take-survey-rating-item {
+     flex: 1;
+ }
+
+ .take-survey-rating-input {
+     display: none;
+ }
+
+ .take-survey-rating-label {
+     display: block;
+     padding: 10px;
+     text-align: center;
+     font-size: 14px;
+     font-weight: 500;
+     color: #6c757d;
+     background: #f8f9fa;
+     border: 1px solid #dee2e6;
+     border-radius: 6px;
+     cursor: pointer;
+     transition: all 0.2s;
+ }
+
+ .take-survey-rating-label:hover {
+     background: #e9ecef;
+ }
+
+ .take-survey-rating-input:checked+.take-survey-rating-label {
+     background: #4f46e5;
+     color: white;
+     border-color: #4f46e5;
+ }
+
+ .take-survey-mcq-option {
+     margin-bottom: 8px;
+ }
+
+ .take-survey-mcq-label {
+     display: flex;
+     align-items: center;
+     padding: 10px 12px;
+     border: 1px solid #dee2e6;
+     border-radius: 6px;
+     cursor: pointer;
+     transition: all 0.2s;
+ }
+
+ .take-survey-mcq-label:hover {
+     background: #f8f9fa;
+ }
+
+ .take-survey-mcq-input {
+     margin: 0;
+     margin-right: 10px;
+     width: 18px;
+     height: 18px;
+     cursor: pointer;
+     accent-color: #4f46e5;
+ }
+
+ .take-survey-mcq-text {
+     font-size: 14px;
+     color: #212529;
+ }
+
+ .take-survey-footer {
+     padding: 20px 32px;
+     border-top: 1px solid #e9ecef;
+     background: #f8f9fa;
+ }
+
+ .take-survey-submit {
+     width: 100%;
+     padding: 12px 24px;
+     font-size: 15px;
+     font-weight: 500;
+     color: white;
+     background: #4f46e5;
+     border: none;
+     border-radius: 6px;
+     cursor: pointer;
+     transition: background 0.2s;
+ }
+
+ .take-survey-submit:hover:not(:disabled) {
+     background: #4338ca;
+ }
+
+ .take-survey-submit:disabled {
+     opacity: 0.5;
+     cursor: not-allowed;
+ }
+
+ @media (max-width: 768px) {
+     .take-survey-container {
+         padding: 20px 12px;
+     }
+
+     .take-survey-header {
+         padding: 24px 20px 20px;
+     }
+
+     .take-survey-title {
+         font-size: 20px;
+     }
+
+     .take-survey-description {
+         font-size: 13px;
+     }
+
+     .take-survey-body {
+         padding: 20px;
+     }
+
+     .take-survey-footer {
+         padding: 16px 20px;
+     }
+
+     .take-survey-rating {
+         gap: 6px;
+     }
+
+     .take-survey-rating-label {
+         padding: 8px;
+         font-size: 13px;
+     }
+ }
