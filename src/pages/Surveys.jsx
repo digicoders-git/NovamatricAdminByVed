@@ -3,7 +3,8 @@ import { Plus, Search, Copy, Check, ChevronLeft, ChevronRight, ArrowUpDown } fro
 import DashboardLayout from './Dashboard';
 import { useNavigate } from 'react-router-dom';
 import './CSS/Surveys.css';
-
+import Swal from "sweetalert2";
+import axios from "axios";
 const Surveys = () => {
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,8 +16,8 @@ const Surveys = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [copiedId, setCopiedId] = useState(null);
   const API_URL = import.meta.env.VITE_API_URL;
-  const Vite_Domain=import.meta.env.VITE_Domain
-  
+  const Vite_Domain = import.meta.env.VITE_Domain
+
 
   const limit = 10;
   const navigate = useNavigate();
@@ -24,6 +25,39 @@ const Surveys = () => {
   const handleView = (id) => {
     navigate(`/survey-view/${id}`);
   };
+  const handleResponsse = (id) => {
+    navigate(`/survey-response/${id}`);
+  };
+
+  const handleDelete = async (id) => {
+  try {
+    // Step 1: Confirmation Popup
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (!result.isConfirmed) return;
+
+    // Step 2: Delete API Call
+    await axios.delete(`${API_URL}/api/survey/surveys/${id}`);
+
+    // Step 3: Success Alert
+    Swal.fire("Deleted!", "Survey has been deleted.", "success");
+
+    // Step 4: List refresh (optional)
+    setSurveys((prev) => prev.filter((s) => s._id !== id));
+
+  } catch (error) {
+    console.log(error);
+    Swal.fire("Error!", "Something went wrong!", "error");
+  }
+};
 
   useEffect(() => {
     fetchSurveys();
@@ -129,8 +163,10 @@ const Surveys = () => {
                       </span>
                     </th>
                     <th>Description</th>
-                    <th>Redirect Link</th>
+                    <th>Survey Link</th>
                     <th>View</th>
+                    <th>Response</th>
+                    <th>Delete</th>
                   </tr>
                 </thead>
 
@@ -167,6 +203,22 @@ const Surveys = () => {
                           onClick={() => handleView(survey._id)}
                         >
                           View
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="response-btn"
+                          onClick={() => handleResponsse(survey._id)}
+                        >
+                          Response
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="delete-btn"
+                          onClick={() => handleDelete(survey._id)}
+                        >
+                          Delete
                         </button>
                       </td>
                     </tr>

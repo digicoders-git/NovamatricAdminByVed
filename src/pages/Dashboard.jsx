@@ -53,9 +53,11 @@ const DashboardLayout = ({ children }) => {
   const sidebarItems = [
     { label: 'Home', icon: Home, path: '/' },
     { label: 'Servey List', icon: BarChart3, path: '/surveys' },
+    // { label: 'Survey Response', icon: Users, path: '/survey-response/' },
     { label: 'Completed List', icon: Users, path: '/complete-survey' },
     { label: 'Terminated List', icon: Users, path: '/terminate-survey' },
     { label: 'Quota Full List', icon: Users, path: '/quota-full-survey' },
+    { label: 'Redirect Links', icon: Users, path: '/redirect-links' },
   ];
 
   return (

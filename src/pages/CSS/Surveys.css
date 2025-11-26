@@ -11,6 +11,30 @@
   background: #1d4ed8;
 }
 
+.delete-btn{
+     padding: 6px 12px;
+  background: #dc261d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: #c12116;
+}
+.response-btn{
+     padding: 6px 12px;
+  background: #098039;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: #c12116;
+}
 
 
 .surveys-page-container {

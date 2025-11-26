@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileDown, Download } from 'lucide-react';
-import './CSS/CompleteServey.css'
+import * as XLSX from "xlsx";        // ✅ Excel import added
+import './CSS/CompleteServey.css';
 import DashboardLayout from './Dashboard';
 
 const QuotaFullSurveys = () => {
@@ -13,13 +14,15 @@ const QuotaFullSurveys = () => {
   useEffect(() => {
     fetchQuotaFullSurveys();
   }, []);
+  console.log(surveys);
+  
 
   const fetchQuotaFullSurveys = async () => {
     try {
       const response = await fetch(`${API_URL}/api/survey/quota-full-surveys`);
       const data = await response.json();
       console.log(data);
-      
+
       if (data.success) {
         setSurveys(data.data || []);
       }
@@ -30,10 +33,12 @@ const QuotaFullSurveys = () => {
     }
   };
 
+  // ✅ CSV Export
   const exportToCSV = () => {
-    const headers = ['S.No', 'Project ID', 'IP Address', 'Status', 'Quota Full At'];
+    const headers = ['S.No', 'User ID','Project ID', 'IP Address', 'Status', 'Quota Full At'];
     const csvData = surveys.map((survey, index) => [
       index + 1,
+      survey.userId,
       survey.projectId,
       survey.ipaddress,
       survey.status,
@@ -52,9 +57,10 @@ const QuotaFullSurveys = () => {
     link.click();
   };
 
+  // ✅ PDF Export
   const exportToPDF = () => {
     const printWindow = window.open('', '', 'height=600,width=800');
-    
+
     const tableHTML = `
       <!DOCTYPE html>
       <html>
@@ -78,6 +84,7 @@ const QuotaFullSurveys = () => {
             <thead>
               <tr>
                 <th>S.No</th>
+                <th>User ID</th>
                 <th>Project ID</th>
                 <th>IP Address</th>
                 <th>Status</th>
@@ -88,6 +95,7 @@ const QuotaFullSurveys = () => {
               ${surveys.map((survey, index) => `
                 <tr>
                   <td>${index + 1}</td>
+                  <td>${survey.userId}</td>
                   <td>${survey.projectId}</td>
                   <td>${survey.ipaddress}</td>
                   <td><span class="status-quota-full">${survey.status}</span></td>
@@ -102,16 +110,40 @@ const QuotaFullSurveys = () => {
         </body>
       </html>
     `;
-    
+
     printWindow.document.write(tableHTML);
     printWindow.document.close();
     printWindow.focus();
+
     setTimeout(() => {
       printWindow.print();
       printWindow.close();
     }, 250);
   };
 
+  // ✅ EXCEL Export Added
+  const exportToExcel = () => {
+    const worksheetData = surveys.map((survey, index) => ({
+      "S.No": index + 1,
+      "User ID": survey.userId,
+      "Project ID": survey.projectId,
+      "IP Address": survey.ipaddress,
+      "Status": survey.status,
+      "Quota Full At": new Date(survey.createdAt).toLocaleString()
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Quota Full Surveys");
+
+    XLSX.writeFile(
+      workbook,
+      `Quota_Full_Surveys_${new Date().toISOString().split("T")[0]}.xlsx`
+    );
+  };
+
+  // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = surveys.slice(indexOfFirstItem, indexOfLastItem);
@@ -135,19 +167,26 @@ const QuotaFullSurveys = () => {
               <h1>📊 Quota Full Surveys</h1>
               <p className="complete-subtitle">Track and manage all quota full survey responses</p>
             </div>
-            
-            <div className="complete-stats">
+
+            {/* <div className="complete-stats">
               <div className="complete-stat-card">
                 <span className="complete-stat-number">{surveys.length}</span>
                 <span className="complete-stat-label">Total Quota Full</span>
               </div>
-            </div>
+            </div> */}
 
+            {/* Export Buttons */}
             <div className="complete-export-section">
               <button className="complete-export-btn complete-export-csv" onClick={exportToCSV}>
                 <Download size={18} />
                 Export CSV
               </button>
+
+              <button className="complete-export-btn complete-export-csv" onClick={exportToExcel}>
+                <Download size={18} />
+                Export Excel
+              </button>
+
               <button className="complete-export-btn complete-export-pdf" onClick={exportToPDF}>
                 <FileDown size={18} />
                 Export PDF
@@ -168,6 +207,7 @@ const QuotaFullSurveys = () => {
                     <thead>
                       <tr>
                         <th>S.No</th>
+                        <th>User ID</th>
                         <th>Project ID</th>
                         <th>IP Address</th>
                         <th>Status</th>
@@ -178,6 +218,7 @@ const QuotaFullSurveys = () => {
                       {currentItems.map((survey, index) => (
                         <tr key={survey._id}>
                           <td>{indexOfFirstItem + index + 1}</td>
+                          <td>{survey.userId}</td>
                           <td>{survey.projectId}</td>
                           <td>{survey.ipaddress}</td>
                           <td>
@@ -192,6 +233,7 @@ const QuotaFullSurveys = () => {
                   </table>
                 </div>
 
+                {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="complete-pagination">
                     <button
@@ -201,11 +243,11 @@ const QuotaFullSurveys = () => {
                     >
                       Previous
                     </button>
-                    
+
                     <span className="complete-page-info">
                       Page {currentPage} of {totalPages}
                     </span>
-                    
+
                     <button
                       className="complete-page-btn"
                       onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}

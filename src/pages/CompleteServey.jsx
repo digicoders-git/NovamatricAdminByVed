@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { FileDown, Download } from 'lucide-react';
+import * as XLSX from "xlsx"; // <-- Added for Excel Export
 import DashboardLayout from './Dashboard';
 import './CSS/CompleteServey.css'
+
 const CompleteServey = () => {
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     fetchCompletedSurveys();
   }, []);
@@ -17,8 +20,7 @@ const CompleteServey = () => {
       const response = await fetch(`${API_URL}/api/survey/complete-survey`);
       const data = await response.json();
       console.log(data);
-      
-      
+
       if (data.success) {
         setSurveys(data.data || []);
       }
@@ -29,10 +31,12 @@ const CompleteServey = () => {
     }
   };
 
+  // ---------------- CSV EXPORT ----------------
   const exportToCSV = () => {
-    const headers = ['S.No', 'Project ID', 'IP Address', 'Status', 'Completed At'];
+    const headers = ['S.No', 'User ID','Project ID', 'IP Address', 'Status', 'Completed At'];
     const csvData = surveys.map((survey, index) => [
       index + 1,
+      survey.userId,
       survey.projectId,
       survey.ipaddress,
       survey.status,
@@ -51,9 +55,29 @@ const CompleteServey = () => {
     link.click();
   };
 
+  // ---------------- EXCEL EXPORT ----------------
+  const exportToExcel = () => {
+    const excelData = surveys.map((survey, index) => ({
+      "S.No": index + 1,
+      "User ID": survey.userId,
+      "Project ID": survey.projectId,
+      "IP Address": survey.ipaddress,
+      "Status": survey.status,
+      "Completed At": new Date(survey.createdAt).toLocaleString()
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Completed Surveys");
+
+    XLSX.writeFile(workbook, `completed_surveys_${new Date().toISOString().split("T")[0]}.xlsx`);
+  };
+
+  // ---------------- PDF EXPORT ----------------
   const exportToPDF = () => {
     const printWindow = window.open('', '', 'height=600,width=800');
-    
+
     const tableHTML = `
       <!DOCTYPE html>
       <html>
@@ -76,6 +100,7 @@ const CompleteServey = () => {
             <thead>
               <tr>
                 <th>S.No</th>
+                <th>User ID</th>
                 <th>Project ID</th>
                 <th>IP Address</th>
                 <th>Status</th>
@@ -86,6 +111,7 @@ const CompleteServey = () => {
               ${surveys.map((survey, index) => `
                 <tr>
                   <td>${index + 1}</td>
+                  <td>${survey.userId}</td>
                   <td>${survey.projectId}</td>
                   <td>${survey.ipaddress}</td>
                   <td>${survey.status}</td>
@@ -100,7 +126,7 @@ const CompleteServey = () => {
         </body>
       </html>
     `;
-    
+
     printWindow.document.write(tableHTML);
     printWindow.document.close();
     printWindow.focus();
@@ -126,98 +152,106 @@ const CompleteServey = () => {
 
   return (
     <DashboardLayout>
-    <div className="complete-main-container">
-      <div className="complete-content-wrapper">
-        <div className="complete-header">
-          <div className="complete-title-section">
-            <h1>📊 Completed Surveys</h1>
-            <p className="complete-subtitle">Track and manage all completed survey responses</p>
-          </div>
-          
-          <div className="complete-stats">
-            <div className="complete-stat-card">
-              <span className="complete-stat-number">{surveys.length}</span>
-              <span className="complete-stat-label">Total Completed</span>
+      <div className="complete-main-container">
+        <div className="complete-content-wrapper">
+          <div className="complete-header">
+            <div className="complete-title-section">
+              <h1>📊 Completed Surveys</h1>
+              <p className="complete-subtitle">Track and manage all completed survey responses</p>
             </div>
-          </div>
-
-          <div className="complete-export-section">
-            <button className="complete-export-btn complete-export-csv" onClick={exportToCSV}>
-              <Download size={18} />
-              Export CSV
-            </button>
-            <button className="complete-export-btn complete-export-pdf" onClick={exportToPDF}>
-              <FileDown size={18} />
-              Export PDF
-            </button>
-          </div>
-        </div>
-
-        <div className="complete-table-container">
-          {surveys.length === 0 ? (
-            <div className="complete-empty-state">
-              <h3>No Completed Surveys Yet</h3>
-              <p>Completed surveys will appear here once available.</p>
-            </div>
-          ) : (
-            <>
-              <div className="complete-table-wrapper">
-                <table className="complete-table">
-                  <thead>
-                    <tr>
-                      <th>S.No</th>
-                      <th>Project ID</th>
-                      <th>IP Address</th>
-                      <th>Status</th>
-                      <th>Completed At</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentItems.map((survey, index) => (
-                      <tr key={survey._id}>
-                        <td>{indexOfFirstItem + index + 1}</td>
-                        <td>{survey.projectId}</td>
-                        <td>{survey.ipaddress}</td>
-                        <td>
-                          <span className="complete-status-badge">
-                            {survey.status}
-                          </span>
-                        </td>
-                        <td>{new Date(survey.createdAt).toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+{/* 
+            <div className="complete-stats">
+              <div className="complete-stat-card">
+                <span className="complete-stat-number">{surveys.length}</span>
+                <span className="complete-stat-label">Total Completed</span>
               </div>
+            </div> */}
 
-              {totalPages > 1 && (
-                <div className="complete-pagination">
-                  <button
-                    className="complete-page-btn"
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                  >
-                    Previous
-                  </button>
-                  
-                  <span className="complete-page-info">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  
-                  <button
-                    className="complete-page-btn"
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                  >
-                    Next
-                  </button>
+            <div className="complete-export-section">
+              <button className="complete-export-btn complete-export-csv" onClick={exportToCSV}>
+                <Download size={18} />
+                Export CSV
+              </button>
+
+              <button className="complete-export-btn complete-export-csv" onClick={exportToExcel}>
+                <Download size={18} />
+                Export Excel
+              </button>
+
+              <button className="complete-export-btn complete-export-pdf" onClick={exportToPDF}>
+                <FileDown size={18} />
+                Export PDF
+              </button>
+            </div>
+          </div>
+
+          <div className="complete-table-container">
+            {surveys.length === 0 ? (
+              <div className="complete-empty-state">
+                <h3>No Completed Surveys Yet</h3>
+                <p>Completed surveys will appear here once available.</p>
+              </div>
+            ) : (
+              <>
+                <div className="complete-table-wrapper">
+                  <table className="complete-table">
+                    <thead>
+                      <tr>
+                        <th>S.No</th>
+                        <th>User ID</th>
+                        <th>Project ID</th>
+                        <th>IP Address</th>
+                        <th>Status</th>
+                        <th>Completed At</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentItems.map((survey, index) => (
+                        <tr key={survey._id}>
+                          <td>{indexOfFirstItem + index + 1}</td>
+                          <td>{survey.userId}</td>
+                          <td>{survey.projectId}</td>
+                          <td>{survey.ipaddress}</td>
+                          <td>
+                            <span className="complete-status-badge">
+                              {survey.status}
+                            </span>
+                          </td>
+                          <td>{new Date(survey.createdAt).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              )}
-            </>
-          )}
+
+                {totalPages > 1 && (
+                  <div className="complete-pagination">
+                    <button
+                      className="complete-page-btn"
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </button>
+
+                    <span className="complete-page-info">
+                      Page {currentPage} of {totalPages}
+                    </span>
+
+                    <button
+                      className="complete-page-btn"
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </DashboardLayout>
   );
 };

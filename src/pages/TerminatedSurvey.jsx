@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { FileDown, Download } from 'lucide-react';
+import * as XLSX from "xlsx";   // <-- Added for Excel Export
 import DashboardLayout from './Dashboard';
 import './CSS/CompleteServey.css'
+
 const terminateSurvey = () => {
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,28 +17,27 @@ const terminateSurvey = () => {
 
   const fetchTerminateSurveys = async () => {
     try {
-      // Replace with your actual API endpoint
       const response = await fetch(`${API_URL}/api/survey/terminate-survey`);
       const data = await response.json();
       console.log(data);
-
 
       if (data.success) {
         setSurveys(data.data || []);
       }
     } catch (error) {
       console.error('Error fetching surveys:', error);
-
     } finally {
       setLoading(false);
     }
   };
 
+  // ---------------- CSV EXPORT ----------------
   const exportToCSV = () => {
-    const headers = ['S.No', 'Project ID', 'IP Address', 'Status', 'Terminate At'];
+    const headers = ['S.No','User ID', 'Project ID', 'IP Address', 'Status', 'Terminate At'];
     const csvData = surveys.map((survey, index) => [
       index + 1,
-      survey.projectId,
+      survey.userId,
+      survey.projectId,  
       survey.ipaddress,
       survey.status,
       new Date(survey.createdAt).toLocaleString()
@@ -54,6 +55,26 @@ const terminateSurvey = () => {
     link.click();
   };
 
+  // ---------------- EXCEL EXPORT ----------------
+  const exportToExcel = () => {
+    const excelData = surveys.map((survey, index) => ({
+      "S.No": index + 1,
+      "User ID": survey.userId,
+      "Project ID": survey.projectId,
+      "IP Address": survey.ipaddress,
+      "Status": survey.status,
+      "Terminate At": new Date(survey.createdAt).toLocaleString()
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Terminate Surveys");
+
+    XLSX.writeFile(workbook, `terminate_surveys_${new Date().toISOString().split("T")[0]}.xlsx`);
+  };
+
+  // ---------------- PDF EXPORT ----------------
   const exportToPDF = () => {
     const printWindow = window.open('', '', 'height=600,width=800');
 
@@ -79,6 +100,7 @@ const terminateSurvey = () => {
             <thead>
               <tr>
                 <th>S.No</th>
+                <th>User ID</th>
                 <th>Project ID</th>
                 <th>IP Address</th>
                 <th>Status</th>
@@ -89,6 +111,7 @@ const terminateSurvey = () => {
               ${surveys.map((survey, index) => `
                 <tr>
                   <td>${index + 1}</td>
+                  <td>${survey.userId}</td>
                   <td>${survey.projectId}</td>
                   <td>${survey.ipaddress}</td>
                   <td>${survey.status}</td>
@@ -137,18 +160,24 @@ const terminateSurvey = () => {
               <p className="complete-subtitle">Track and manage all Terminate survey responses</p>
             </div>
 
-            <div className="complete-stats">
+            {/* <div className="complete-stats">
               <div className="complete-stat-card">
                 <span className="complete-stat-number">{surveys.length}</span>
                 <span className="complete-stat-label">Total Terminate</span>
               </div>
-            </div>
+            </div> */}
 
             <div className="complete-export-section">
               <button className="complete-export-btn complete-export-csv" onClick={exportToCSV}>
                 <Download size={18} />
                 Export CSV
               </button>
+
+              <button className="complete-export-btn complete-export-csv" onClick={exportToExcel}>
+                <Download size={18} />
+                Export Excel
+              </button>
+
               <button className="complete-export-btn complete-export-pdf" onClick={exportToPDF}>
                 <FileDown size={18} />
                 Export PDF
@@ -169,6 +198,7 @@ const terminateSurvey = () => {
                     <thead>
                       <tr>
                         <th>S.No</th>
+                        <th>User ID</th>
                         <th>Project ID</th>
                         <th>IP Address</th>
                         <th>Status</th>
@@ -179,6 +209,7 @@ const terminateSurvey = () => {
                       {currentItems.map((survey, index) => (
                         <tr key={survey._id}>
                           <td>{indexOfFirstItem + index + 1}</td>
+                          <td>{survey.userId}</td>
                           <td>{survey.projectId}</td>
                           <td>{survey.ipaddress}</td>
                           <td>

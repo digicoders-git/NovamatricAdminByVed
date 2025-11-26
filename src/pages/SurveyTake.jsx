@@ -46,7 +46,16 @@ const handleSubmit = async () => {
 
   try {
     await axios.post(`${API_URL}/api/submission/submit`, payload);
-    window.location.href = survey.redirectUrl;
+
+    let url = survey.redirectUrl;
+
+    // Agar http:// ya https:// missing ho to add kar do
+    if (!/^https?:\/\//i.test(url)) {
+      url = "https://" + url;
+    }
+
+    window.open(url, "_blank");
+     setSubmitting(false);
   } catch (error) {
     console.error(error);
     setSubmitting(false);

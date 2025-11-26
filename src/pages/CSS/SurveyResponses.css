@@ -1,0 +1,194 @@
+.submission-container {
+  padding: 20px;
+  max-width: 100%;
+}
+
+.submission-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: end;
+}
+
+.submission-loading,
+.submission-no-data {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+.submission-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.submission-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+  background-color: #fff;
+}
+
+.submission-header {
+  background-color: #f5f5f5;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #ddd;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.submission-row {
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s;
+}
+
+.submission-row:hover {
+  background-color: #f9f9f9;
+}
+
+.submission-cell {
+  padding: 12px 16px;
+  text-align: left;
+  color: #555;
+  border-bottom: 1px solid #eee;
+}
+
+.submission-row:last-child .submission-cell {
+  border-bottom: none;
+}
+
+/* Scrollbar styling */
+.submission-table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.submission-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.submission-table-wrapper::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.submission-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.pagination-btn {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.pagination-btn.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.pagination-btn:disabled {
+  background: #eee;
+  cursor: not-allowed;
+}
+
+.rows-select {
+  padding: 6px;
+  border-radius: 5px;
+}
+
+/* Export buttons styling */
+.submission-header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.export-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.export-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.export-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.export-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.excel-btn {
+    background: #217346;
+    color: white;
+}
+
+.excel-btn:hover:not(:disabled) {
+    background: #1a5c37;
+}
+
+.csv-btn {
+    background: #0066cc;
+    color: white;
+}
+
+.csv-btn:hover:not(:disabled) {
+    background: #0052a3;
+}
+
+.pdf-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.pdf-btn:hover:not(:disabled) {
+    background: #c82333;
+}
+
+@media (max-width: 768px) {
+    .submission-header-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .export-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+}

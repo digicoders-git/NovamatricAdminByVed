@@ -12,6 +12,8 @@ import QuotaFullSurveys from "./pages/QuotaFull";
 import SurveyTake from "./pages/SurveyTake";
 import SurveyFullPage from "./pages/SurveyFullPage";
 import Profile from "./pages/Profile";
+import SurveyResponses from "./pages/Submission";
+import Redirectlinks from "./pages/Redirectlinks";
 
 export default function App() {
   const [auth, setAuth] = useState(Boolean(localStorage.getItem("admin")));
@@ -28,6 +30,7 @@ export default function App() {
           }
         />
 
+        <Route path="/survey/:id" element={<SurveyTake/>} />
         {/* PROTECTED ROUTES */}
         {auth ? (
           <>
@@ -37,9 +40,10 @@ export default function App() {
             <Route path="/complete-survey" element={<CompleteServey />} />
             <Route path="/terminate-survey" element={<TerminateSurvey/>} />
             <Route path="/quota-full-survey" element={<QuotaFullSurveys/>} />
-            <Route path="/survey/:id" element={<SurveyTake/>} />
             <Route path='/survey-view/:id' element={<SurveyFullPage/>}/>
+            <Route path='/survey-response/:id' element={<SurveyResponses/>}/>
             <Route path='/profile' element={<Profile/>}/>
+            <Route path='/redirect-links' element={<Redirectlinks/>}/>
           </>
         ) : (
           /* If NOT logged in, ANY admin route redirects to login */
