@@ -84,16 +84,14 @@
   border: 2px solid rgba(255, 255, 255, 0.3);
   animation: pulse 2s infinite;
 }
-
+.company-logo{
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
-}
-
-.company-logo {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
 }
 
 .logo-placeholder {

@@ -41,7 +41,7 @@ export default function Login({ setAuth }) {
       <div className="login-card-horizontal">
         {/* Left Side - Branding */}
         <div className="brand-section">
-          <div className="logo-container">
+          {/* <div className="logo-container"> */}
             <img 
               src="/logo.png" 
               alt="Company Logo" 
@@ -54,9 +54,9 @@ export default function Login({ setAuth }) {
             <div className="logo-placeholder">
               <span>🏢</span>
             </div>
-          </div>
+          {/* </div> */}
           <div className="brand-content">
-            <h1 className="company-name">Your Company</h1>
+            <h1 className="company-name">Novametric Research</h1>
             <p className="brand-tagline">Welcome to the Admin Portal</p>
             <div className="brand-features">
               <div className="feature-item">
@@ -74,7 +74,8 @@ export default function Login({ setAuth }) {
             </div>
           </div>
           <div className="brand-footer">
-            <p>&copy; 2024 Your Company. All rights reserved.</p>
+            <br />
+            <p>&copy; 2025 Novametric Research. All rights reserved.</p>
           </div>
         </div>
 
@@ -120,14 +121,14 @@ export default function Login({ setAuth }) {
             />
           </div>
 
-          <div className="form-options">
+          {/* <div className="form-options">
             <label className="remember-me">
               <input type="checkbox" />
               <span className="checkmark"></span>
               Remember me
             </label>
             <a href="#" className="forgot-password">Forgot password?</a>
-          </div>
+          </div> */}
 
           <button 
             onClick={handleLogin} 
