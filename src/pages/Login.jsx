@@ -145,9 +145,9 @@ export default function Login({ setAuth }) {
             )}
           </button>
 
-          <div className="login-footer">
+          {/* <div className="login-footer">
             <p>Need help? <a href="#" className="support-link">Contact Support</a></p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
