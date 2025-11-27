@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import './CSS/Profile.css'
+import './CSS/Profile.css';
 import DashboardLayout from './Dashboard';
 
 export default function Profile() {
@@ -8,7 +8,9 @@ export default function Profile() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-const API_URL = import.meta.env.VITE_API_URL;
+
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [adminData, setAdminData] = useState(null);
   const [message, setMessage] = useState('');
 
@@ -18,26 +20,30 @@ const API_URL = import.meta.env.VITE_API_URL;
     confirmPassword: ''
   });
 
+  // Get admin from localStorage
   const admin = JSON.parse(localStorage.getItem("admin"));
 
-  // -------------------------------
-  // 🔥 Fetch Admin Details from API
-  // -------------------------------
+  // --------------------------------------------------
+  // 🔥 Fetch Admin Details on Component Load
+  // --------------------------------------------------
   useEffect(() => {
     const fetchAdmin = async () => {
       try {
         const res = await fetch(`${API_URL}/api/admin/getAdmin/${admin.id}`);
         const data = await res.json();
+
         if (data.success) {
           setAdminData(data.admin);
         }
       } catch (err) {
-        console.log(err);
+        console.log("Error fetching admin:", err);
       }
     };
+
     fetchAdmin();
   }, []);
 
+  // Handle form input changes
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -46,19 +52,19 @@ const API_URL = import.meta.env.VITE_API_URL;
     setMessage('');
   };
 
-  // ------------------------------------
-  // 🔥 Change Password API Call
-  // ------------------------------------
+  // --------------------------------------------------
+  // 🔥 Change Password Function
+  // --------------------------------------------------
   const handlePasswordChange = async (e) => {
     e.preventDefault();
 
     if (formData.newPassword !== formData.confirmPassword) {
-      setMessage('New password aur confirm password match nahi kar rahe!');
+      setMessage("New password and confirm password do not match!");
       return;
     }
 
     if (formData.newPassword.length < 6) {
-      setMessage('Password kam se kam 6 characters ka hona chahiye!');
+      setMessage("Password must be at least 6 characters long.");
       return;
     }
 
@@ -69,7 +75,7 @@ const API_URL = import.meta.env.VITE_API_URL;
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          adminId: adminId,
+          adminId: admin.id,
           currentPassword: formData.currentPassword,
           newPassword: formData.newPassword
         })
@@ -78,13 +84,16 @@ const API_URL = import.meta.env.VITE_API_URL;
       const data = await res.json();
 
       if (data.success) {
-        setMessage("Password successfully change ho gaya!");
+        setMessage("Password successfully changed!");
+
+        // Reset form
         setFormData({
           currentPassword: '',
           newPassword: '',
           confirmPassword: ''
         });
 
+        // Auto-close password form
         setTimeout(() => {
           setShowPasswordForm(false);
           setMessage('');
@@ -95,7 +104,7 @@ const API_URL = import.meta.env.VITE_API_URL;
       }
 
     } catch (err) {
-      console.log(err);
+      console.log("Password change error:", err);
       setMessage("Error while changing password.");
     }
   };
@@ -125,7 +134,7 @@ const API_URL = import.meta.env.VITE_API_URL;
                   <User className="profileInfoIcon" />
                   <div className="profileInfoContent">
                     <div className="profileInfoLabel">Username</div>
-                    <div className="profileInfoValue">{adminData.username}</div>
+                    <div className="profileInfoValue">{adminData.name}</div>
                   </div>
                 </div>
 
@@ -134,7 +143,7 @@ const API_URL = import.meta.env.VITE_API_URL;
                   <div className="profileInfoContent">
                     <div className="profileInfoLabel">Email</div>
                     <div className="profileInfoValue">
-                      {adminData.email || "Not Provided"}
+                      {adminData.username || "Not Provided"}
                     </div>
                   </div>
                 </div>
@@ -142,6 +151,7 @@ const API_URL = import.meta.env.VITE_API_URL;
               </div>
             )}
 
+            {/* Show Change Password Button */}
             {!showPasswordForm ? (
               <button
                 className="profileButton"
@@ -152,6 +162,7 @@ const API_URL = import.meta.env.VITE_API_URL;
               </button>
             ) : (
               <div className="profilePasswordForm">
+
                 {message && (
                   <div className={`profileMessage ${message.includes('successfully') ? 'profileMessageSuccess' : 'profileMessageError'}`}>
                     {message}
@@ -160,6 +171,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
                 <form onSubmit={handlePasswordChange}>
 
+                  {/* Current Password */}
                   <div className="profileFormGroup">
                     <label className="profileLabel">Current Password</label>
                     <div className="profileInputWrapper">
@@ -185,6 +197,7 @@ const API_URL = import.meta.env.VITE_API_URL;
                     </div>
                   </div>
 
+                  {/* New Password */}
                   <div className="profileFormGroup">
                     <label className="profileLabel">New Password</label>
                     <div className="profileInputWrapper">
@@ -210,8 +223,9 @@ const API_URL = import.meta.env.VITE_API_URL;
                     </div>
                   </div>
 
+                  {/* Confirm Password */}
                   <div className="profileFormGroup">
-                    <label className="profileLabel">Confirm New Password</label>
+                    <label className="profileLabel">Confirm Password</label>
                     <div className="profileInputWrapper">
                       <input
                         type={showConfirmPassword ? "text" : "password"}
@@ -235,6 +249,7 @@ const API_URL = import.meta.env.VITE_API_URL;
                     </div>
                   </div>
 
+                  {/* Buttons */}
                   <div className="profileButtonGroup">
                     <button type="submit" className="profileSubmitButton">
                       Update Password

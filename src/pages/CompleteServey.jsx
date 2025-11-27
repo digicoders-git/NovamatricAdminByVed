@@ -1,31 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { FileDown, Download } from 'lucide-react';
-import * as XLSX from "xlsx"; // <-- Added for Excel Export
+import * as XLSX from "xlsx";
 import DashboardLayout from './Dashboard';
-import './CSS/CompleteServey.css'
+import './CSS/CompleteServey.css';
 
 const CompleteServey = () => {
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [search, setSearch] = useState("");
+  const itemsPerPage = 100;
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    fetchCompletedSurveys();
+    fetchCompletedSurveys("");
   }, []);
 
-  const fetchCompletedSurveys = async () => {
+  // ---------------- SERVER SIDE SEARCH + FETCH ----------------
+  const fetchCompletedSurveys = async (searchText = "") => {
     try {
-      const response = await fetch(`${API_URL}/api/survey/complete-survey`);
+      const response = await fetch(
+        `${API_URL}/api/survey/complete-survey?search=${searchText}`
+      );
       const data = await response.json();
-      console.log(data);
 
       if (data.success) {
         setSurveys(data.data || []);
       }
     } catch (error) {
-      console.error('Error fetching surveys:', error);
+      console.error("Error fetching surveys:", error);
     } finally {
       setLoading(false);
     }
@@ -33,20 +36,17 @@ const CompleteServey = () => {
 
   // ---------------- CSV EXPORT ----------------
   const exportToCSV = () => {
-    const headers = ['S.No', 'User ID','Project ID', 'IP Address', 'Status', 'Completed At'];
-    const csvData = surveys.map((survey, index) => [
-      index + 1,
-      survey.userId,
-      survey.projectId,
-      survey.ipaddress,
-      survey.status,
-      new Date(survey.createdAt).toLocaleString()
+    const headers = ['S.No', 'User ID', 'Project ID', 'IP Address', 'Status', 'Completed At'];
+    const csvData = surveys.map((s, idx) => [
+      idx + 1,
+      s.userId,
+      s.projectId,
+      s.ipaddress,
+      s.status,
+      new Date(s.createdAt).toLocaleString()
     ]);
 
-    const csvContent = [
-      headers.join(','),
-      ...csvData.map(row => row.join(','))
-    ].join('\n');
+    const csvContent = [headers.join(','), ...csvData.map(r => r.join(','))].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -57,20 +57,19 @@ const CompleteServey = () => {
 
   // ---------------- EXCEL EXPORT ----------------
   const exportToExcel = () => {
-    const excelData = surveys.map((survey, index) => ({
-      "S.No": index + 1,
-      "User ID": survey.userId,
-      "Project ID": survey.projectId,
-      "IP Address": survey.ipaddress,
-      "Status": survey.status,
-      "Completed At": new Date(survey.createdAt).toLocaleString()
+    const excelData = surveys.map((s, idx) => ({
+      "S.No": idx + 1,
+      "User ID": s.userId,
+      "Project ID": s.projectId,
+      "IP Address": s.ipaddress,
+      "Status": s.status,
+      "Completed At": new Date(s.createdAt).toLocaleString()
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
 
     XLSX.utils.book_append_sheet(workbook, worksheet, "Completed Surveys");
-
     XLSX.writeFile(workbook, `completed_surveys_${new Date().toISOString().split("T")[0]}.xlsx`);
   };
 
@@ -96,6 +95,7 @@ const CompleteServey = () => {
         <body>
           <h1>Completed Surveys Report</h1>
           <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+
           <table>
             <thead>
               <tr>
@@ -108,18 +108,19 @@ const CompleteServey = () => {
               </tr>
             </thead>
             <tbody>
-              ${surveys.map((survey, index) => `
+              ${surveys.map((s, i) => `
                 <tr>
-                  <td>${index + 1}</td>
-                  <td>${survey.userId}</td>
-                  <td>${survey.projectId}</td>
-                  <td>${survey.ipaddress}</td>
-                  <td>${survey.status}</td>
-                  <td>${new Date(survey.createdAt).toLocaleString()}</td>
+                  <td>${i + 1}</td>
+                  <td>${s.userId}</td>
+                  <td>${s.projectId}</td>
+                  <td>${s.ipaddress}</td>
+                  <td>${s.status}</td>
+                  <td>${new Date(s.createdAt).toLocaleString()}</td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
+
           <div class="complete-footer">
             <p>Total Completed Surveys: ${surveys.length}</p>
           </div>
@@ -129,16 +130,16 @@ const CompleteServey = () => {
 
     printWindow.document.write(tableHTML);
     printWindow.document.close();
-    printWindow.focus();
     setTimeout(() => {
       printWindow.print();
       printWindow.close();
     }, 250);
   };
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = surveys.slice(indexOfFirstItem, indexOfLastItem);
+  // Pagination
+  const indexLast = currentPage * itemsPerPage;
+  const indexFirst = indexLast - itemsPerPage;
+  const currentItems = surveys.slice(indexFirst, indexLast);
   const totalPages = Math.ceil(surveys.length / itemsPerPage);
 
   if (loading) {
@@ -154,42 +155,50 @@ const CompleteServey = () => {
     <DashboardLayout>
       <div className="complete-main-container">
         <div className="complete-content-wrapper">
+
+          {/* ---------- HEADER SECTION ---------- */}
           <div className="complete-header">
             <div className="complete-title-section">
               <h1>📊 Completed Surveys</h1>
-              <p className="complete-subtitle">Track and manage all completed survey responses</p>
+              <p className="complete-subtitle">Track and manage completed survey responses</p>
             </div>
-{/* 
-            <div className="complete-stats">
-              <div className="complete-stat-card">
-                <span className="complete-stat-number">{surveys.length}</span>
-                <span className="complete-stat-label">Total Completed</span>
-              </div>
-            </div> */}
 
+            {/* ----------- SEARCH BOX ----------- */}
+
+
+            {/* ---------- EXPORT BUTTONS ---------- */}
             <div className="complete-export-section">
               <button className="complete-export-btn complete-export-csv" onClick={exportToCSV}>
-                <Download size={18} />
-                Export CSV
+                <Download size={18} /> Export CSV
               </button>
-
               <button className="complete-export-btn complete-export-csv" onClick={exportToExcel}>
-                <Download size={18} />
-                Export Excel
+                <Download size={18} /> Export Excel
               </button>
-
               <button className="complete-export-btn complete-export-pdf" onClick={exportToPDF}>
-                <FileDown size={18} />
-                Export PDF
+                <FileDown size={18} /> Export PDF
               </button>
+            </div>
+            <div className="complete-search-box">
+              <input
+                type="text"
+                className="complete-search-input"
+                placeholder="Search User ID, Project ID, IP, Status..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  fetchCompletedSurveys(e.target.value);
+                }}
+              />
             </div>
           </div>
 
+
+          {/* ---------- TABLE SECTION ---------- */}
           <div className="complete-table-container">
             {surveys.length === 0 ? (
               <div className="complete-empty-state">
-                <h3>No Completed Surveys Yet</h3>
-                <p>Completed surveys will appear here once available.</p>
+                <h3>No Completed Surveys</h3>
+                <p>Try adjusting your search filter.</p>
               </div>
             ) : (
               <>
@@ -206,16 +215,14 @@ const CompleteServey = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {currentItems.map((survey, index) => (
+                      {currentItems.map((survey, i) => (
                         <tr key={survey._id}>
-                          <td>{indexOfFirstItem + index + 1}</td>
+                          <td>{indexFirst + i + 1}</td>
                           <td>{survey.userId}</td>
                           <td>{survey.projectId}</td>
                           <td>{survey.ipaddress}</td>
                           <td>
-                            <span className="complete-status-badge">
-                              {survey.status}
-                            </span>
+                            <span className="complete-status-badge">{survey.status}</span>
                           </td>
                           <td>{new Date(survey.createdAt).toLocaleString()}</td>
                         </tr>
@@ -224,11 +231,12 @@ const CompleteServey = () => {
                   </table>
                 </div>
 
+                {/* ---------- PAGINATION ---------- */}
                 {totalPages > 1 && (
                   <div className="complete-pagination">
                     <button
                       className="complete-page-btn"
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                       disabled={currentPage === 1}
                     >
                       Previous
@@ -240,7 +248,7 @@ const CompleteServey = () => {
 
                     <button
                       className="complete-page-btn"
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                       disabled={currentPage === totalPages}
                     >
                       Next

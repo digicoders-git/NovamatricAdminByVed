@@ -1,28 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { FileDown, Download } from 'lucide-react';
-import * as XLSX from "xlsx";        // ✅ Excel import added
+import * as XLSX from "xlsx";
 import './CSS/CompleteServey.css';
 import DashboardLayout from './Dashboard';
 
 const QuotaFullSurveys = () => {
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+
+  const itemsPerPage = 100;
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     fetchQuotaFullSurveys();
   }, []);
-  console.log(surveys);
-  
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchQuotaFullSurveys();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const fetchQuotaFullSurveys = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/survey/quota-full-surveys`);
-      const data = await response.json();
-      console.log(data);
+      setLoading(true);
 
+      const response = await fetch(
+        `${API_URL}/api/survey/quota-full-surveys?search=${search}`
+      );
+
+      const data = await response.json();
       if (data.success) {
         setSurveys(data.data || []);
       }
@@ -33,9 +44,10 @@ const QuotaFullSurveys = () => {
     }
   };
 
-  // ✅ CSV Export
+  // ---------------- CSV EXPORT ----------------
   const exportToCSV = () => {
-    const headers = ['S.No', 'User ID','Project ID', 'IP Address', 'Status', 'Quota Full At'];
+    const headers = ['S.No', 'User ID', 'Project ID', 'IP Address', 'Status', 'Quota Full At'];
+
     const csvData = surveys.map((survey, index) => [
       index + 1,
       survey.userId,
@@ -57,7 +69,25 @@ const QuotaFullSurveys = () => {
     link.click();
   };
 
-  // ✅ PDF Export
+  // ---------------- EXCEL EXPORT ----------------
+  const exportToExcel = () => {
+    const excelData = surveys.map((survey, index) => ({
+      "S.No": index + 1,
+      "User ID": survey.userId,
+      "Project ID": survey.projectId,
+      "IP Address": survey.ipaddress,
+      "Status": survey.status,
+      "Quota Full At": new Date(survey.createdAt).toLocaleString()
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Quota Full Surveys");
+
+    XLSX.writeFile(workbook, `Quota_full_surveys_${new Date().toISOString().split("T")[0]}.xlsx`);
+  };
+
+  // ---------------- PDF EXPORT ----------------
   const exportToPDF = () => {
     const printWindow = window.open('', '', 'height=600,width=800');
 
@@ -73,13 +103,13 @@ const QuotaFullSurveys = () => {
             th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
             th { background-color: #2563eb; color: white; }
             tr:nth-child(even) { background-color: #f9fafb; }
-            .quota-full-footer { margin-top: 30px; text-align: center; color: #666; }
-            .status-quota-full { background-color: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; }
+            .status-qf { background-color: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; }
           </style>
         </head>
         <body>
           <h1>Quota Full Surveys Report</h1>
           <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+
           <table>
             <thead>
               <tr>
@@ -98,55 +128,26 @@ const QuotaFullSurveys = () => {
                   <td>${survey.userId}</td>
                   <td>${survey.projectId}</td>
                   <td>${survey.ipaddress}</td>
-                  <td><span class="status-quota-full">${survey.status}</span></td>
+                  <td><span class="status-qf">${survey.status}</span></td>
                   <td>${new Date(survey.createdAt).toLocaleString()}</td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
-          <div class="quota-full-footer">
-            <p>Total Quota Full Surveys: ${surveys.length}</p>
-          </div>
         </body>
       </html>
     `;
 
     printWindow.document.write(tableHTML);
     printWindow.document.close();
-    printWindow.focus();
-
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 250);
-  };
-
-  // ✅ EXCEL Export Added
-  const exportToExcel = () => {
-    const worksheetData = surveys.map((survey, index) => ({
-      "S.No": index + 1,
-      "User ID": survey.userId,
-      "Project ID": survey.projectId,
-      "IP Address": survey.ipaddress,
-      "Status": survey.status,
-      "Quota Full At": new Date(survey.createdAt).toLocaleString()
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
-    const workbook = XLSX.utils.book_new();
-
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Quota Full Surveys");
-
-    XLSX.writeFile(
-      workbook,
-      `Quota_Full_Surveys_${new Date().toISOString().split("T")[0]}.xlsx`
-    );
+    printWindow.print();
+    printWindow.close();
   };
 
   // Pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = surveys.slice(indexOfFirstItem, indexOfLastItem);
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentItems = surveys.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(surveys.length / itemsPerPage);
 
   if (loading) {
@@ -162,43 +163,47 @@ const QuotaFullSurveys = () => {
     <DashboardLayout>
       <div className="complete-main-container">
         <div className="complete-content-wrapper">
+
           <div className="complete-header">
+
             <div className="complete-title-section">
               <h1>📊 Quota Full Surveys</h1>
               <p className="complete-subtitle">Track and manage all quota full survey responses</p>
             </div>
 
-            {/* <div className="complete-stats">
-              <div className="complete-stat-card">
-                <span className="complete-stat-number">{surveys.length}</span>
-                <span className="complete-stat-label">Total Quota Full</span>
-              </div>
-            </div> */}
-
-            {/* Export Buttons */}
+         
+            {/* EXPORT BUTTONS */}
             <div className="complete-export-section">
               <button className="complete-export-btn complete-export-csv" onClick={exportToCSV}>
-                <Download size={18} />
-                Export CSV
+                <Download size={18} /> Export CSV
               </button>
-
               <button className="complete-export-btn complete-export-csv" onClick={exportToExcel}>
-                <Download size={18} />
-                Export Excel
+                <Download size={18} /> Export Excel
               </button>
-
               <button className="complete-export-btn complete-export-pdf" onClick={exportToPDF}>
-                <FileDown size={18} />
-                Export PDF
+                <FileDown size={18} /> Export PDF
               </button>
             </div>
+
+               {/* 🔍 SEARCH BOX */}
+            <div className="complete-search-box">
+              <input
+                type="text"
+                placeholder="Search User ID, Project ID, IP, Status..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="complete-search-input"
+              />
+            </div>
+
           </div>
 
+          {/* TABLE */}
           <div className="complete-table-container">
             {surveys.length === 0 ? (
               <div className="complete-empty-state">
-                <h3>No Quota Full Surveys Yet</h3>
-                <p>Quota full surveys will appear here once available.</p>
+                <h3>No Quota Full Surveys Found</h3>
+                <p>Try changing your search.</p>
               </div>
             ) : (
               <>
@@ -215,14 +220,14 @@ const QuotaFullSurveys = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {currentItems.map((survey, index) => (
+                      {currentItems.map((survey, idx) => (
                         <tr key={survey._id}>
-                          <td>{indexOfFirstItem + index + 1}</td>
+                          <td>{indexOfFirst + idx + 1}</td>
                           <td>{survey.userId}</td>
                           <td>{survey.projectId}</td>
                           <td>{survey.ipaddress}</td>
                           <td>
-                            <span className="complete-status-badge complete-status-quota-full">
+                            <span className="complete-status-quota-full">
                               {survey.status}
                             </span>
                           </td>
@@ -233,13 +238,13 @@ const QuotaFullSurveys = () => {
                   </table>
                 </div>
 
-                {/* Pagination */}
+                {/* PAGINATION */}
                 {totalPages > 1 && (
                   <div className="complete-pagination">
                     <button
                       className="complete-page-btn"
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                       disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                     >
                       Previous
                     </button>
@@ -250,8 +255,8 @@ const QuotaFullSurveys = () => {
 
                     <button
                       className="complete-page-btn"
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                       disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                     >
                       Next
                     </button>
@@ -260,6 +265,7 @@ const QuotaFullSurveys = () => {
               </>
             )}
           </div>
+
         </div>
       </div>
     </DashboardLayout>

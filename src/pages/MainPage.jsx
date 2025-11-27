@@ -112,30 +112,8 @@ const MainPage = () => {
           </div>
         </div>
 
-        {/* Overall Stats Section */}
-        <h2 className="main-page-section-title">Overall Statistics</h2>
-        <div className="main-page-stats-grid">
-          <StatsCard 
-            title="Total Surveys" 
-            value={stats.totalSurveys} 
-            icon="📋"
-            trend={12}
-          />
-          <StatsCard 
-            title="Total Clicks" 
-            value={stats.totalClicks} 
-            icon="👆"
-            trend={8}
-          />
-          <StatsCard 
-            title="Total Submissions" 
-            value={stats.totalSubmissions} 
-            icon="✅"
-            trend={15}
-          />
-        </div>
 
-        {/* Today Overview Section */}
+            {/* Today Overview Section */}
         <h2 className="main-page-section-title">Today's Overview</h2>
         <div className="main-page-stats-grid">
           <StatsCard 
@@ -160,6 +138,31 @@ const MainPage = () => {
           />
         </div>
 
+
+        {/* Overall Stats Section */}
+        <h2 className="main-page-section-title">Overall Statistics</h2>
+        <div className="main-page-stats-grid">
+          <StatsCard 
+            title="Total Surveys" 
+            value={stats.totalSurveys} 
+            icon="📋"
+            trend={12}
+          />
+          <StatsCard 
+            title="Total Clicks" 
+            value={stats.totalClicks} 
+            icon="👆"
+            trend={8}
+          />
+          <StatsCard 
+            title="Total Submissions" 
+            value={stats.totalSubmissions} 
+            icon="✅"
+            trend={15}
+          />
+        </div>
+
+    
         {/* Status Breakdown Chart */}
         <h2 className="main-page-section-title">Status Breakdown</h2>
         <BarChartComponent stats={stats} />

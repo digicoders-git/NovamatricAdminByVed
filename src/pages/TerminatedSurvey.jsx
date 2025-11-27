@@ -1,31 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { FileDown, Download } from 'lucide-react';
-import * as XLSX from "xlsx";   // <-- Added for Excel Export
+import * as XLSX from "xlsx";
 import DashboardLayout from './Dashboard';
-import './CSS/CompleteServey.css'
+import './CSS/CompleteServey.css';
 
-const terminateSurvey = () => {
+const TerminateSurvey = () => {
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+
+  const itemsPerPage = 100;
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     fetchTerminateSurveys();
   }, []);
 
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      fetchTerminateSurveys();
+    }, 500); // debounce
+
+    return () => clearTimeout(delayDebounce);
+  }, [search]);
+
   const fetchTerminateSurveys = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/survey/terminate-survey`);
-      const data = await response.json();
-      console.log(data);
+      setLoading(true);
 
+      const response = await fetch(
+        `${API_URL}/api/survey/terminate-survey?search=${search}`
+      );
+
+      const data = await response.json();
       if (data.success) {
         setSurveys(data.data || []);
       }
     } catch (error) {
-      console.error('Error fetching surveys:', error);
+      console.error("Error fetching surveys:", error);
     } finally {
       setLoading(false);
     }
@@ -33,11 +46,12 @@ const terminateSurvey = () => {
 
   // ---------------- CSV EXPORT ----------------
   const exportToCSV = () => {
-    const headers = ['S.No','User ID', 'Project ID', 'IP Address', 'Status', 'Terminate At'];
+    const headers = ['S.No', 'User ID', 'Project ID', 'IP Address', 'Status', 'Terminate At'];
+
     const csvData = surveys.map((survey, index) => [
       index + 1,
       survey.userId,
-      survey.projectId,  
+      survey.projectId,
       survey.ipaddress,
       survey.status,
       new Date(survey.createdAt).toLocaleString()
@@ -68,9 +82,7 @@ const terminateSurvey = () => {
 
     const worksheet = XLSX.utils.json_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
-
     XLSX.utils.book_append_sheet(workbook, worksheet, "Terminate Surveys");
-
     XLSX.writeFile(workbook, `terminate_surveys_${new Date().toISOString().split("T")[0]}.xlsx`);
   };
 
@@ -136,6 +148,7 @@ const terminateSurvey = () => {
     }, 250);
   };
 
+  // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = surveys.slice(indexOfFirstItem, indexOfLastItem);
@@ -154,42 +167,45 @@ const terminateSurvey = () => {
     <DashboardLayout>
       <div className="complete-main-container">
         <div className="complete-content-wrapper">
+
           <div className="complete-header">
+
             <div className="complete-title-section">
               <h1>📊 Terminate Surveys</h1>
-              <p className="complete-subtitle">Track and manage all Terminate survey responses</p>
+              <p className="complete-subtitle">Track and manage all terminate survey responses</p>
             </div>
-
-            {/* <div className="complete-stats">
-              <div className="complete-stat-card">
-                <span className="complete-stat-number">{surveys.length}</span>
-                <span className="complete-stat-label">Total Terminate</span>
-              </div>
-            </div> */}
 
             <div className="complete-export-section">
               <button className="complete-export-btn complete-export-csv" onClick={exportToCSV}>
-                <Download size={18} />
-                Export CSV
+                <Download size={18} /> Export CSV
               </button>
 
               <button className="complete-export-btn complete-export-csv" onClick={exportToExcel}>
-                <Download size={18} />
-                Export Excel
+                <Download size={18} /> Export Excel
               </button>
 
               <button className="complete-export-btn complete-export-pdf" onClick={exportToPDF}>
-                <FileDown size={18} />
-                Export PDF
+                <FileDown size={18} /> Export PDF
               </button>
             </div>
+              {/* 🔍 SEARCH BOX */}
+            <div className="complete-search-box">
+              <input
+                type="text"
+                placeholder="Search User ID, Project ID, IP, Status..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="complete-search-input"
+              />
+            </div>
+
           </div>
 
           <div className="complete-table-container">
             {surveys.length === 0 ? (
               <div className="complete-empty-state">
-                <h3>No Terminate Surveys Yet</h3>
-                <p>Terminate surveys will appear here once available.</p>
+                <h3>No Terminate Surveys Found</h3>
+                <p>Try changing the search keywords.</p>
               </div>
             ) : (
               <>
@@ -205,6 +221,7 @@ const terminateSurvey = () => {
                         <th>Terminate At</th>
                       </tr>
                     </thead>
+
                     <tbody>
                       {currentItems.map((survey, index) => (
                         <tr key={survey._id}>
@@ -213,9 +230,7 @@ const terminateSurvey = () => {
                           <td>{survey.projectId}</td>
                           <td>{survey.ipaddress}</td>
                           <td>
-                            <span className="complete-status-badge">
-                              {survey.status}
-                            </span>
+                            <span className="terminate-status-badge">{survey.status}</span>
                           </td>
                           <td>{new Date(survey.createdAt).toLocaleString()}</td>
                         </tr>
@@ -250,10 +265,11 @@ const terminateSurvey = () => {
               </>
             )}
           </div>
+
         </div>
       </div>
     </DashboardLayout>
   );
 };
 
-export default terminateSurvey;
+export default TerminateSurvey;
