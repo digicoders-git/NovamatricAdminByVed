@@ -1,5 +1,257 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
+// Separate OTPModal Component
+const OTPModal = ({ 
+  email, 
+  showOTPModal, 
+  setShowOTPModal, 
+  API_URL,
+  onVerificationSuccess 
+}) => {
+  const [otp, setOtp] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const countdownRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Countdown timer
+  useEffect(() => {
+    if (countdown > 0) {
+      countdownRef.current = setTimeout(() => {
+        setCountdown(prev => prev - 1);
+      }, 1000);
+    }
+
+    return () => {
+      if (countdownRef.current) {
+        clearTimeout(countdownRef.current);
+      }
+    };
+  }, [countdown]);
+
+  // Auto-focus input when OTP sent
+  useEffect(() => {
+    if (otpSent && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [otpSent]);
+
+  // Reset when modal closes
+  useEffect(() => {
+    if (!showOTPModal) {
+      resetModal();
+    }
+  }, [showOTPModal]);
+
+  const resetModal = () => {
+    setOtp('');
+    setOtpError('');
+    setOtpSent(false);
+    setCountdown(0);
+    setOtpLoading(false);
+    if (countdownRef.current) {
+      clearTimeout(countdownRef.current);
+    }
+  };
+
+  const sendOTP = async () => {
+    if (!email) {
+      alert('Please enter your email first');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+
+    setOtpLoading(true);
+    setOtpError('');
+
+    try {
+      const response = await fetch(`${API_URL}/api/otp/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to send OTP');
+      }
+
+      setOtpSent(true);
+      setCountdown(60);
+      setOtpError('');
+    } catch (error) {
+      setOtpError(error.message);
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const verifyOTP = async () => {
+    if (!otp || otp.length !== 6) {
+      setOtpError('Please enter a valid 6-digit OTP');
+      return;
+    }
+
+    setOtpLoading(true);
+    setOtpError('');
+
+    try {
+      const response = await fetch(`${API_URL}/api/otp/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email, 
+          otp 
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'OTP verification failed');
+      }
+
+      if (onVerificationSuccess) {
+        onVerificationSuccess();
+      }
+      
+      setShowOTPModal(false);
+    } catch (error) {
+      setOtpError(error.message);
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const resendOTP = async () => {
+    if (countdown > 0) {
+      setOtpError(`Please wait ${countdown} seconds before resending OTP`);
+      return;
+    }
+    await sendOTP();
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && otp.length === 6) {
+      verifyOTP();
+    }
+  };
+
+  if (!showOTPModal) return null;
+
+  return (
+    <div style={modalStyles.overlay}>
+      <div style={modalStyles.content}>
+        <h2 style={modalStyles.title}>Email Verification</h2>
+        
+        {!otpSent ? (
+          <>
+            <p style={modalStyles.text}>
+              We'll send a 6-digit OTP to:<br />
+              <strong>{email}</strong>
+            </p>
+            <button
+              onClick={sendOTP}
+              disabled={otpLoading}
+              style={{
+                ...modalStyles.btn,
+                ...modalStyles.btnPrimary,
+                opacity: otpLoading ? 0.7 : 1,
+                padding: '12px 30px',
+                fontSize: '16px'
+              }}
+            >
+              {otpLoading ? (
+                <>
+                  <span style={modalStyles.spinner}></span>
+                  Sending...
+                </>
+              ) : (
+                'Send OTP'
+              )}
+            </button>
+          </>
+        ) : (
+          <>
+            <p style={modalStyles.text}>
+              Enter the 6-digit OTP sent to:<br />
+              <strong>{email}</strong>
+            </p>
+            
+            <div style={modalStyles.otpContainer}>
+              <input
+                ref={inputRef}
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onKeyPress={handleKeyPress}
+                placeholder="000000"
+                style={modalStyles.otpInput}
+                maxLength={6}
+              />
+            </div>
+
+            {otpError && (
+              <div style={modalStyles.error}>
+                <span style={modalStyles.errorIcon}>⚠</span>
+                <span>{otpError}</span>
+              </div>
+            )}
+
+            <div style={modalStyles.buttonGroup}>
+              <button
+                onClick={resendOTP}
+                disabled={countdown > 0 || otpLoading}
+                style={{
+                  ...modalStyles.btn,
+                  ...modalStyles.btnSecondary,
+                  opacity: (countdown > 0 || otpLoading) ? 0.5 : 1
+                }}
+              >
+                {countdown > 0 ? `Resend (${countdown}s)` : 'Resend OTP'}
+              </button>
+              <button
+                onClick={verifyOTP}
+                disabled={otpLoading || otp.length !== 6}
+                style={{
+                  ...modalStyles.btn,
+                  ...modalStyles.btnPrimary,
+                  opacity: (otpLoading || otp.length !== 6) ? 0.7 : 1
+                }}
+              >
+                {otpLoading ? (
+                  <>
+                    <span style={modalStyles.spinner}></span>
+                    Verifying...
+                  </>
+                ) : (
+                  'Verify OTP'
+                )}
+              </button>
+            </div>
+          </>
+        )}
+
+        <button
+          onClick={() => setShowOTPModal(false)}
+          style={modalStyles.closeBtn}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Main Registration Component
 const Registration = () => {
   const initialFormState = {
     fullName: '',
@@ -33,8 +285,19 @@ const Registration = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [submitResponse, setSubmitResponse] = useState(null);
+  
+  // OTP States
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
 
-  const API_URL = import.meta.env.VITE_API_URL; // Adjust if different
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+  // Reset OTP verification when email changes
+  useEffect(() => {
+    if (otpVerified && formData.email) {
+      setOtpVerified(false);
+    }
+  }, [formData.email, otpVerified]);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -67,6 +330,70 @@ const Registration = () => {
   const purchaseOptions = ['Yes', 'No'];
   const vehicleOptions = ['Car', 'Two-Wheeler', 'None'];
   const yesNoOptions = ['Yes', 'No'];
+
+  const handleOTPVerificationSuccess = () => {
+    setOtpVerified(true);
+  };
+
+  const handleSubmit = async () => {
+    if (!otpVerified) {
+      alert('Please verify your email before submitting');
+      setShowOTPModal(true);
+      return;
+    }
+
+    if (!formData.finalConsent) {
+      alert('Please agree to the terms before submitting.');
+      return;
+    }
+
+    if (formData.ageConfirm !== 'Yes') {
+      alert('You must confirm you are 18 years or older.');
+      return;
+    }
+
+    const required = [
+      "fullName", "age", "gender", "location", "education", "email", "householdSize",
+      "maritalStatus", "income", "homeOwnership", "employmentStatus", "industry",
+      "experience", "designation", "orgSize", "purchaseDecision", "vehicle",
+      "dataConsent", "nda", "ageConfirm", "communication"
+    ];
+
+    for (const field of required) {
+      if (!formData[field] || formData[field] === "") {
+        alert(`${field} is required`);
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      const response = await fetch(`${API_URL}/api/registration/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          emailVerified: true
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Submission failed');
+      }
+
+      setSubmitResponse(data);
+      setShowSuccess(true);
+    } catch (error) {
+      console.error('❌ Submission error:', error);
+      setSubmitError(error.message || 'An error occurred. Please try again.');
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Reusable Radio Option Component
   const RadioOption = ({ name, value, checked, onChange, label }) => (
@@ -165,16 +492,48 @@ const Registration = () => {
       title: "Contact & Verification",
       number: 2,
       content: (
-        <div className="form-group">
-          <label>Primary Email Address *</label>
-          <input
-            type="email"
-            value={formData.email}
-            onChange={(e) => handleChange('email', e.target.value)}
-            placeholder="your.email@example.com"
-            required
-          />
-        </div>
+        <>
+          <div className="form-group">
+            <label>Primary Email Address *</label>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                placeholder="your.email@example.com"
+                required
+                style={{ flex: 1 }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowOTPModal(true)}
+                style={{
+                  padding: '10px 20px',
+                  background: otpVerified ? '#48bb78' : '#667eea',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.3s'
+                }}
+              >
+                {otpVerified ? '✓ Verified' : 'Verify Email'}
+              </button>
+            </div>
+            {otpVerified && (
+              <p style={{ color: '#48bb78', marginTop: '10px', fontWeight: '500' }}>
+                ✓ Email verified successfully
+              </p>
+            )}
+            {!otpVerified && formData.email && (
+              <p style={{ color: '#e53e3e', marginTop: '10px', fontSize: '0.9rem' }}>
+                ⚠ Email not verified. Click "Verify Email" to continue.
+              </p>
+            )}
+          </div>
+        </>
       )
     },
     {
@@ -493,6 +852,12 @@ const Registration = () => {
   ];
 
   const nextSection = () => {
+    if (currentSection === 1 && formData.email && !otpVerified) {
+      alert('Please verify your email before proceeding.');
+      setShowOTPModal(true);
+      return;
+    }
+
     if (currentSection < sections.length - 1) {
       setCurrentSection(currentSection + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -506,71 +871,14 @@ const Registration = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    // Validate final consent
-    if (!formData.finalConsent) {
-      alert('Please agree to the terms before submitting.');
-      return;
-    }
-
-    // Validate age confirmation
-    if (formData.ageConfirm !== 'Yes') {
-      alert('You must confirm you are 18 years or older.');
-      return;
-    }
-
-    setIsSubmitting(true);
-    setSubmitError('');
-
-    try {
-      // Step 1: Log data to console (as requested)
-      console.log('=== FORM SUBMISSION DATA ===');
-      console.log('Timestamp:', new Date().toISOString());
-      console.log('Form Data:', formData);
-      console.log('JSON for API:', JSON.stringify(formData, null, 2));
-      console.log('===========================');
-
-      // Step 2: Send to backend API
-      console.log('🚀 Sending data to backend...');
-      
-      const response = await fetch(`${API_URL}/api/registration/add`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
-
-      // Log API response to console
-      console.log('✅ Backend Response:', data);
-
-      if (!response.ok) {
-        throw new Error(data.message || data.errors?.join(', ') || 'Submission failed');
-      }
-
-      // Save response for success screen
-      setSubmitResponse(data);
-
-      // Show success message
-      setShowSuccess(true);
-      
-    } catch (error) {
-      console.error('❌ Submission error:', error);
-      setSubmitError(error.message || 'An error occurred. Please try again.');
-      alert(`Error: ${error.message}`);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const resetForm = () => {
     setFormData(initialFormState);
     setCurrentSection(0);
     setSubmitError('');
     setSubmitResponse(null);
     setShowSuccess(false);
+    setOtpVerified(false);
+    setShowOTPModal(false);
   };
 
   // Success message component
@@ -586,12 +894,19 @@ const Registration = () => {
           
           {submitResponse && (
             <div style={styles.responseInfo}>
-              <p><strong>Registration ID:</strong> {submitResponse.data?.id}</p>
+              <p><strong>Registration ID:</strong> {submitResponse.data?._id || submitResponse.data?.id}</p>
               <p><strong>Name:</strong> {submitResponse.data?.fullName}</p>
               <p><strong>Email:</strong> {submitResponse.data?.email}</p>
               <p><strong>Submitted at:</strong> {new Date(submitResponse.data?.createdAt).toLocaleString()}</p>
+              <p style={{ color: '#48bb78', fontWeight: '500' }}>
+                ✓ Email verified successfully
+              </p>
             </div>
           )}
+          
+          <p style={styles.successSubMessage}>
+            A confirmation email has been sent to your registered email address.
+          </p>
           
           <div style={styles.buttonGroup}>
             <button 
@@ -600,6 +915,7 @@ const Registration = () => {
                 console.log('=== VIEWING SUBMITTED DATA ===');
                 console.log('Form Data:', formData);
                 console.log('API Response:', submitResponse);
+                alert('Data logged to console. Check developer tools.');
               }}
             >
               View Data in Console
@@ -622,6 +938,14 @@ const Registration = () => {
         <div style={styles.logo}>NovaMetric Research</div>
         <div style={styles.subtitle}>Panel Brief Questionnaire</div>
       </header>
+
+      <OTPModal
+        email={formData.email}
+        showOTPModal={showOTPModal}
+        setShowOTPModal={setShowOTPModal}
+        API_URL={API_URL}
+        onVerificationSuccess={handleOTPVerificationSuccess}
+      />
 
       <div style={styles.progressBar}>
         <div 
@@ -676,7 +1000,7 @@ const Registration = () => {
                 ...(isSubmitting && styles.btnSubmitting)
               }} 
               onClick={handleSubmit}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !otpVerified}
             >
               {isSubmitting ? (
                 <>
@@ -819,6 +1143,26 @@ const Registration = () => {
           flex-shrink: 0;
         }
 
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        
+        @keyframes scaleIn {
+          from { transform: scale(0); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes modalSlideIn {
+          from { transform: translateY(-20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
+        }
+
         @media (max-width: 768px) {
           .radio-group {
             flex-direction: column;
@@ -827,12 +1171,17 @@ const Registration = () => {
           .radio-label {
             min-width: 100%;
           }
+          
+          .form-group input[type="email"] {
+            margin-bottom: 10px;
+          }
         }
       `}</style>
     </div>
   );
 };
 
+// Styles for Main Component
 const styles = {
   container: {
     minHeight: '100vh',
@@ -1003,18 +1352,120 @@ const styles = {
   },
 };
 
-// Add CSS animations
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  
-  @keyframes scaleIn {
-    from { transform: scale(0); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-`;
-document.head.appendChild(styleSheet);
+// Styles for OTP Modal
+const modalStyles = {
+  overlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    backdropFilter: 'blur(4px)',
+  },
+  content: {
+    backgroundColor: 'white',
+    padding: '2.5rem',
+    borderRadius: '12px',
+    boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+    maxWidth: '400px',
+    width: '90%',
+    textAlign: 'center',
+    animation: 'modalSlideIn 0.3s ease',
+  },
+  title: {
+    fontSize: '1.5rem',
+    color: '#1a1a2e',
+    marginBottom: '1rem',
+    fontWeight: 700,
+  },
+  text: {
+    color: '#4a5568',
+    marginBottom: '1.5rem',
+    lineHeight: '1.5',
+    fontSize: '0.95rem',
+  },
+  otpContainer: {
+    margin: '1.5rem 0',
+  },
+  otpInput: {
+    width: '100%',
+    padding: '15px',
+    fontSize: '1.5rem',
+    textAlign: 'center',
+    letterSpacing: '10px',
+    border: '2px solid #e2e8f0',
+    borderRadius: '8px',
+    background: '#f8fafc',
+    fontFamily: 'monospace',
+    fontWeight: 'bold',
+    transition: 'all 0.2s',
+  },
+  error: {
+    background: '#fed7d7',
+    border: '2px solid #fc8181',
+    color: '#c53030',
+    padding: '0.75rem',
+    borderRadius: '8px',
+    marginBottom: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.9rem',
+  },
+  errorIcon: {
+    fontSize: '1rem',
+  },
+  buttonGroup: {
+    display: 'flex',
+    gap: '1rem',
+    justifyContent: 'center',
+    marginTop: '1.5rem',
+  },
+  btn: {
+    padding: '0.75rem 1.5rem',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '0.95rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    minWidth: '120px',
+  },
+  btnPrimary: {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+  },
+  btnSecondary: {
+    background: 'white',
+    color: '#667eea',
+    border: '2px solid #667eea',
+  },
+  spinner: {
+    width: '16px',
+    height: '16px',
+    border: '2px solid rgba(255,255,255,0.3)',
+    borderTopColor: 'white',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+    display: 'inline-block',
+    marginRight: '0.5rem',
+  },
+  closeBtn: {
+    marginTop: '1.5rem',
+    padding: '10px 20px',
+    background: 'transparent',
+    color: '#718096',
+    border: 'none',
+    cursor: 'pointer',
+    fontWeight: '500',
+    fontSize: '0.9rem',
+  },
+};
 
 export default Registration;

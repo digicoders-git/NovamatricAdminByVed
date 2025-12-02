@@ -326,3 +326,252 @@
      font-size: 12px;
    }
  }
+
+ /* View Button */
+.complete-view-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.complete-view-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* Modal Styles */
+.complete-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.complete-modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.complete-modal-header {
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.complete-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.complete-modal-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 28px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.complete-modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.complete-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  max-height: calc(90vh - 140px);
+}
+
+/* Raw Data Info */
+.complete-raw-data-info {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  border: 1px solid #e2e8f0;
+}
+
+.complete-info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.complete-info-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.complete-info-label {
+  font-weight: 600;
+  color: #475569;
+  min-width: 140px;
+}
+
+.complete-info-value {
+  color: #1e293b;
+  font-weight: 500;
+}
+
+/* Raw Data Table */
+.complete-raw-data-table-container h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #1e293b;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.complete-raw-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.complete-raw-data-table thead {
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+}
+
+.complete-raw-data-table th {
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #334155;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.complete-raw-data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.complete-raw-data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.complete-raw-field {
+  width: 35%;
+  vertical-align: top;
+}
+
+.complete-field-key {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 4px;
+  font-family: monospace;
+}
+
+.complete-raw-value {
+  width: 65%;
+  word-break: break-word;
+}
+
+.complete-json-view {
+  background: #f8fafc;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9rem;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+/* Modal Footer */
+.complete-modal-footer {
+  padding-top: 24px;
+  margin-top: 24px;
+  border-top: 1px solid #e2e8f0;
+  text-align: right;
+}
+
+.complete-modal-btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.complete-modal-close-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.complete-modal-close-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .complete-modal-content {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .complete-raw-data-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .complete-info-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .complete-info-label {
+    margin-bottom: 4px;
+  }
+}

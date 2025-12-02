@@ -70,9 +70,6 @@ const Surveys = () => {
         `${API_URL}/api/survey/getServey?page=${page}&limit=${limit}&search=${searchTerm}&sortBy=${sortBy}&sortOrder=${sortOrder}`
       );
       const result = await response.json();
-      console.log(result);
-
-
       if (result.success) {
         setSurveys(result.data);
         setTotalPages(result.pagination.totalPages);

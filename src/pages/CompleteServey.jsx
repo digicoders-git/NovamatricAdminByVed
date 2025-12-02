@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileDown, Download } from 'lucide-react';
+import { FileDown, Download, Eye } from 'lucide-react';
 import * as XLSX from "xlsx";
 import DashboardLayout from './Dashboard';
 import './CSS/CompleteServey.css';
@@ -9,6 +9,8 @@ const CompleteServey = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [selectedSurvey, setSelectedSurvey] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const itemsPerPage = 100;
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -22,8 +24,10 @@ const CompleteServey = () => {
       const response = await fetch(
         `${API_URL}/api/survey/complete-survey?search=${searchText}`
       );
+      
       const data = await response.json();
-
+      console.log(data);
+      
       if (data.success) {
         setSurveys(data.data || []);
       }
@@ -32,6 +36,29 @@ const CompleteServey = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // ---------------- VIEW RAW DATA ----------------
+  const handleViewRawData = (survey) => {
+    console.log("hello");
+    
+    setSelectedSurvey(survey);
+    setShowModal(true);
+  };
+
+  // ---------------- CLOSE MODAL ----------------
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedSurvey(null);
+  };
+
+  // ---------------- FORMAT FIELD NAME ----------------
+  const formatFieldName = (field) => {
+    // Convert camelCase to Title Case
+    return field
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase())
+      .replace(/_/g, ' ');
   };
 
   // ---------------- CSV EXPORT ----------------
@@ -163,9 +190,6 @@ const CompleteServey = () => {
               <p className="complete-subtitle">Track and manage completed survey responses</p>
             </div>
 
-            {/* ----------- SEARCH BOX ----------- */}
-
-
             {/* ---------- EXPORT BUTTONS ---------- */}
             <div className="complete-export-section">
               <button className="complete-export-btn complete-export-csv" onClick={exportToCSV}>
@@ -192,7 +216,6 @@ const CompleteServey = () => {
             </div>
           </div>
 
-
           {/* ---------- TABLE SECTION ---------- */}
           <div className="complete-table-container">
             {surveys.length === 0 ? (
@@ -212,6 +235,7 @@ const CompleteServey = () => {
                         <th>IP Address</th>
                         <th>Status</th>
                         <th>Completed At</th>
+                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -225,6 +249,15 @@ const CompleteServey = () => {
                             <span className="complete-status-badge">{survey.status}</span>
                           </td>
                           <td>{new Date(survey.createdAt).toLocaleString()}</td>
+                          <td>
+                            <button
+                              className="complete-view-btn"
+                              onClick={() => handleViewRawData(survey)}
+                              title="View Raw Data"
+                            >
+                              <Eye size={16} />
+                            </button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -260,6 +293,80 @@ const CompleteServey = () => {
           </div>
         </div>
       </div>
+
+      {/* ---------- MODAL FOR RAW DATA ---------- */}
+      {showModal && selectedSurvey && (
+        <div className="complete-modal-overlay" onClick={closeModal}>
+          <div className="complete-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="complete-modal-header">
+              <h2>📋 Survey Raw Data</h2>
+              <button className="complete-modal-close" onClick={closeModal}>
+                &times;
+              </button>
+            </div>
+            
+            <div className="complete-modal-body">
+              <div className="complete-raw-data-info">
+                <div className="complete-info-row">
+                  <span className="complete-info-label">User ID:</span>
+                  <span className="complete-info-value">{selectedSurvey.userId}</span>
+                </div>
+                <div className="complete-info-row">
+                  <span className="complete-info-label">Project ID:</span>
+                  <span className="complete-info-value">{selectedSurvey.projectId}</span>
+                </div>
+                <div className="complete-info-row">
+                  <span className="complete-info-label">Status:</span>
+                  <span className="complete-info-value">{selectedSurvey.status}</span>
+                </div>
+                <div className="complete-info-row">
+                  <span className="complete-info-label">Completed At:</span>
+                  <span className="complete-info-value">
+                    {new Date(selectedSurvey.createdAt).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              <div className="complete-raw-data-table-container">
+                <h3>All Fields</h3>
+                <table className="complete-raw-data-table">
+                  <thead>
+                    <tr>
+                      <th>Field</th>
+                      <th>Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(selectedSurvey).map(([key, value]) => (
+                      <tr key={key}>
+                        <td className="complete-raw-field">
+                          <strong>{formatFieldName(key)}</strong>
+                          <div className="complete-field-key">({key})</div>
+                        </td>
+                        <td className="complete-raw-value">
+                          {typeof value === 'object' && value !== null ? (
+                            <pre className="complete-json-view">
+                              {JSON.stringify(value, null, 2)}
+                            </pre>
+                          ) : (
+                            String(value)
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="complete-modal-footer">
+                <button className="complete-modal-btn complete-modal-close-btn" onClick={closeModal}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };
