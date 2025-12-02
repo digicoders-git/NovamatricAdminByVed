@@ -13,6 +13,8 @@ const SurveyBuilder = () => {
   const [surveyUrl, setSurveyUrl] = useState('');
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [projectIDfromClient, setProjectIDfromClient] = useState('');
+  const [projectIDfromInter, setProjectIDfromInter] = useState('');
 
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
@@ -64,6 +66,8 @@ const SurveyBuilder = () => {
     const surveyData = {
       surveyName,
       description,
+      projectIDfromClient,
+      projectIDfromInter,
       questions,
       redirectUrl
     };
@@ -154,6 +158,28 @@ const SurveyBuilder = () => {
                   value={surveyName}
                   onChange={(e) => setSurveyName(e.target.value)}
                   placeholder="e.g. Customer Survey"
+                />
+              </div>
+
+              <div className="survey-create-form-group">
+                <label className="survey-create-label">Client Project ID</label>
+                <input
+                  type="text"
+                  className="survey-create-input"
+                  value={projectIDfromClient}
+                  onChange={(e) => setProjectIDfromClient(e.target.value)}
+                  placeholder="Client's"
+                />
+              </div>
+
+              <div className="survey-create-form-group">
+                <label className="survey-create-label">Internal Project ID</label>
+                <input
+                  type="text"
+                  className="survey-create-input"
+                  value={projectIDfromInter}
+                  onChange={(e) => setProjectIDfromInter(e.target.value)}
+                  placeholder="Internal"
                 />
               </div>
 
@@ -331,6 +357,8 @@ const SurveyBuilder = () => {
                   onClick={() => {
                     setSurveyName('');
                     setDescription('');
+                    setProjectIDfromClient('');
+                    setProjectIDfromInter('');
                     setQuestions([]);
                     setRedirectUrl('');
                     setSurveyUrl('');

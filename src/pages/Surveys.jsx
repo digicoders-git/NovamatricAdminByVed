@@ -19,7 +19,7 @@ const Surveys = () => {
   const Vite_Domain = import.meta.env.VITE_Domain
 
 
-  const limit = 10;
+  const limit = 100;
   const navigate = useNavigate();
 
   const handleView = (id) => {

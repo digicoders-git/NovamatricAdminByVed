@@ -1,0 +1,435 @@
+/* ShowRegistration.css */
+
+.registrations-container {
+  padding: 1.5rem;
+  background: #f9fafb;
+  min-height: 100vh;
+}
+
+/* Header Styles */
+.registrations-header {
+  margin-bottom: 1.5rem;
+}
+
+.registrations-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.registrations-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.registrations-stats {
+  font-size: 1rem;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+}
+
+.registrations-count {
+  font-weight: 600;
+  color: #111827;
+  background: #f3f4f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  margin-left: 0.5rem;
+}
+
+.registrations-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Search Styles */
+.registrations-search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+
+.registrations-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+.registrations-search-input {
+  width: 100%;
+  padding: 0.625rem 2.5rem 0.625rem 2.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.registrations-search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.registrations-clear-search {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.registrations-clear-search:hover {
+  color: #374151;
+}
+
+.registrations-btn-refresh {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.625rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.registrations-btn-refresh:hover {
+  background: #2563eb;
+}
+
+/* Table Container */
+.registrations-table-container {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.registrations-table-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.registrations-search-info {
+  background: #e0e7ff;
+  color: #4f46e5;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+}
+
+/* Table Styles */
+.registrations-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.registrations-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.registrations-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+}
+
+.registrations-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.registrations-table-sortable {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.registrations-table-sortable:hover {
+  color: #374151;
+}
+
+/* Cell Styles */
+.registrations-name-cell {
+  font-weight: 500;
+  color: #111827;
+}
+
+.registrations-email-cell {
+  min-width: 200px;
+}
+
+.registrations-email-link {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.registrations-email-link:hover {
+  text-decoration: underline;
+}
+
+.registrations-age-badge {
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.registrations-gender-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.registrations-gender-badge.male {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.registrations-gender-badge.female {
+  background: #fce7f3;
+  color: #be185d;
+}
+
+.registrations-gender-badge.other {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.registrations-date-cell {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.registrations-view-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.registrations-view-btn:hover {
+  background: #2563eb;
+}
+
+/* Loading State */
+.registrations-loading {
+  padding: 3rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.registrations-spinner {
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.registrations-empty {
+  padding: 3rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.registrations-empty p:first-child {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.registrations-empty p:last-child {
+  font-size: 0.875rem;
+}
+
+/* Pagination */
+.registrations-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.registrations-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.registrations-pagination-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  color: #374151;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.registrations-pagination-btn:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.registrations-pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Export Buttons Styles */
+.registrations-export-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.registrations-btn-export {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.registrations-btn-export:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.registrations-btn-export:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.registrations-btn-export:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.registrations-btn-csv {
+  background: #10b981;
+}
+
+.registrations-btn-csv:hover:not(:disabled) {
+  background: #059669;
+}
+
+.registrations-btn-excel {
+  background: #059669;
+}
+
+.registrations-btn-excel:hover:not(:disabled) {
+  background: #047857;
+}
+
+.registrations-btn-pdf {
+  background: #dc2626;
+}
+
+.registrations-btn-pdf:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+/* Responsive adjustments for export buttons */
+@media (max-width: 768px) {
+  .registrations-export-buttons {
+    flex-wrap: wrap;
+  }
+  
+  .registrations-btn-export {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .registrations-btn-export span {
+    display: none;
+  }
+}
+
+/* Loading state for export buttons */
+.registrations-btn-export.loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.registrations-btn-export.loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

@@ -58,6 +58,7 @@ const DashboardLayout = ({ children }) => {
     { label: 'Terminated List', icon: Users, path: '/terminate-survey' },
     { label: 'Quota Full List', icon: Users, path: '/quota-full-survey' },
     { label: 'Redirect Links', icon: Users, path: '/redirect-links' },
+    { label: 'Registration', icon: Users, path: '/registrations-all' },
   ];
 
   return (

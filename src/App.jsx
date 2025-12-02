@@ -14,6 +14,10 @@ import SurveyFullPage from "./pages/SurveyFullPage";
 import Profile from "./pages/Profile";
 import SurveyResponses from "./pages/Submission";
 import Redirectlinks from "./pages/Redirectlinks";
+import Registration from "./pages/Registration";
+// import ShowAllRegistration from "./pages/ShowAllRegistration";
+import ShowRegistration from "./pages/ShowAllRegistration";
+import RegistrationDetail from "./pages/RegistrationDetail";
 
 export default function App() {
   const [auth, setAuth] = useState(Boolean(localStorage.getItem("admin")));
@@ -31,6 +35,7 @@ export default function App() {
         />
 
         <Route path="/survey/:id" element={<SurveyTake/>} />
+        <Route path="/registration" element={<Registration/>} />
         {/* PROTECTED ROUTES */}
         {auth ? (
           <>
@@ -44,6 +49,8 @@ export default function App() {
             <Route path='/survey-response/:id' element={<SurveyResponses/>}/>
             <Route path='/profile' element={<Profile/>}/>
             <Route path='/redirect-links' element={<Redirectlinks/>}/>
+            <Route path='/registrations-all' element={<ShowRegistration/>}/>
+            <Route path='/view-registration/:id' element={<RegistrationDetail/>}/>
           </>
         ) : (
           /* If NOT logged in, ANY admin route redirects to login */
