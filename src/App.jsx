@@ -14,7 +14,7 @@ import SurveyFullPage from "./pages/SurveyFullPage";
 import Profile from "./pages/Profile";
 import SurveyResponses from "./pages/Submission";
 import Redirectlinks from "./pages/Redirectlinks";
-import Registration from "./pages/Registration";
+// import Registration from "./pages/Registration";
 // import ShowAllRegistration from "./pages/ShowAllRegistration";
 import ShowRegistration from "./pages/ShowAllRegistration";
 import RegistrationDetail from "./pages/RegistrationDetail";
@@ -35,7 +35,7 @@ export default function App() {
         />
 
         <Route path="/survey/:id" element={<SurveyTake/>} />
-        <Route path="/registration" element={<Registration/>} />
+        {/* <Route path="/registration" element={<Registration/>} /> */}
         {/* PROTECTED ROUTES */}
         {auth ? (
           <>

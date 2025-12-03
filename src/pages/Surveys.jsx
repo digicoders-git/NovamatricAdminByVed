@@ -30,34 +30,34 @@ const Surveys = () => {
   };
 
   const handleDelete = async (id) => {
-  try {
-    // Step 1: Confirmation Popup
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    });
+    try {
+      // Step 1: Confirmation Popup
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      });
 
-    if (!result.isConfirmed) return;
+      if (!result.isConfirmed) return;
 
-    // Step 2: Delete API Call
-    await axios.delete(`${API_URL}/api/survey/surveys/${id}`);
+      // Step 2: Delete API Call
+      await axios.delete(`${API_URL}/api/survey/surveys/${id}`);
 
-    // Step 3: Success Alert
-    Swal.fire("Deleted!", "Survey has been deleted.", "success");
+      // Step 3: Success Alert
+      Swal.fire("Deleted!", "Survey has been deleted.", "success");
 
-    // Step 4: List refresh (optional)
-    setSurveys((prev) => prev.filter((s) => s._id !== id));
+      // Step 4: List refresh (optional)
+      setSurveys((prev) => prev.filter((s) => s._id !== id));
 
-  } catch (error) {
-    console.log(error);
-    Swal.fire("Error!", "Something went wrong!", "error");
-  }
-};
+    } catch (error) {
+      console.log(error);
+      Swal.fire("Error!", "Something went wrong!", "error");
+    }
+  };
 
   useEffect(() => {
     fetchSurveys();
@@ -70,6 +70,8 @@ const Surveys = () => {
         `${API_URL}/api/survey/getServey?page=${page}&limit=${limit}&search=${searchTerm}&sortBy=${sortBy}&sortOrder=${sortOrder}`
       );
       const result = await response.json();
+      console.log(result);
+
       if (result.success) {
         setSurveys(result.data);
         setTotalPages(result.pagination.totalPages);
@@ -179,12 +181,13 @@ const Surveys = () => {
                         <div className="surveys-page-link-container">
 
                           <div className="surveys-page-link-text">
-                            {`${Vite_Domain}/survey/${survey._id}`}
+                            {survey.generatedLink || "No link generated"}
                           </div>
 
                           <button
-                            className={`surveys-page-btn-copy ${copiedId === survey._id ? 'surveys-page-copied' : ''}`}
-                            onClick={() => copyToClipboard(`${Vite_Domain}/survey/${survey._id}`, survey._id)}
+                            className={`surveys-page-btn-copy ${copiedId === survey._id ? "surveys-page-copied" : ""}`}
+                            onClick={() => copyToClipboard(survey.generatedLink, survey._id)}
+                            disabled={!survey.generatedLink}
                           >
                             {copiedId === survey._id ? <Check size={16} /> : <Copy size={16} />}
                           </button>

@@ -581,11 +581,11 @@ const Registration = () => {
               required
             >
               <option value="">Select income range</option>
-              <option value="0-25">$0 – $25,000</option>
-              <option value="25-50">$25,000 – $50,000</option>
-              <option value="51-100">$51,000 – $100,000</option>
-              <option value="100-150">$100,000 – $150,000</option>
-              <option value="150+">$150,000+</option>
+              <option value="$0-25">$0 – $25,000</option>
+              <option value="$25-50">$25,000 – $50,000</option>
+              <option value="$51-100">$51,000 – $100,000</option>
+              <option value="$100-150">$100,000 – $150,000</option>
+              <option value="$150+">$150,000+</option>
             </select>
           </div>
 

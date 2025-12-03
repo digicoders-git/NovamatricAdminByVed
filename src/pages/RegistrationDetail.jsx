@@ -124,7 +124,6 @@ const RegistrationDetail = () => {
                             icon="pi pi-arrow-left"
                             className="p-button-text p-button-plain reg-back-btn"
                             onClick={() => navigate(-1)}
-                            // tooltip="Back to list"
                         />
                         <div className="reg-header-info">
                             <h1>Registration Details</h1>
@@ -145,14 +144,7 @@ const RegistrationDetail = () => {
                             icon="pi pi-refresh"
                             className="p-button-text"
                             onClick={fetchRegistration}
-                            // tooltip="Refresh"
                         />
-                        {/* <Button
-                            label="Print"
-                            icon="pi pi-print"
-                            className="p-button-outlined"
-                            onClick={() => window.print()}
-                        /> */}
                     </div>
                 </div>
 
@@ -184,6 +176,13 @@ const RegistrationDetail = () => {
                         <div className="stat-info">
                             <span className="stat-value">{registration.householdSize}</span>
                             <span className="stat-label">Household</span>
+                        </div>
+                    </div>
+                    <div className="stat-card">
+                        <i className="pi pi-map-marker stat-icon" />
+                        <div className="stat-info">
+                            <span className="stat-value">{registration.city}</span>
+                            <span className="stat-label">City</span>
                         </div>
                     </div>
                 </div>
@@ -218,12 +217,40 @@ const RegistrationDetail = () => {
                                 </span>
                             </div>
                             <div className="info-row">
-                                <span className="info-label">Location</span>
-                                <span className="info-value">{registration.location}</span>
-                            </div>
-                            <div className="info-row">
                                 <span className="info-label">Education</span>
                                 <span className="info-value">{registration.education}</span>
+                            </div>
+                        </div>
+                    </Card>
+
+                    {/* Location Information */}
+                    <Card className="reg-card">
+                        <div className="card-title">
+                            <i className="pi pi-map-marker" />
+                            <h2>Location Information</h2>
+                        </div>
+                        <div className="card-body">
+                            <div className="info-row">
+                                <span className="info-label">Country</span>
+                                <span className="info-value strong">{registration.country}</span>
+                            </div>
+                            <div className="info-row">
+                                <span className="info-label">State/Province</span>
+                                <span className="info-value">{registration.state}</span>
+                            </div>
+                            <div className="info-row">
+                                <span className="info-label">City</span>
+                                <span className="info-value">{registration.city}</span>
+                            </div>
+                            <div className="info-row">
+                                <span className="info-label">Pincode/ZIP</span>
+                                <span className="info-value mono">{registration.pincode}</span>
+                            </div>
+                            <div className="info-row">
+                                <span className="info-label">Location</span>
+                                <span className="info-value">
+                                    {registration.location || `${registration.city}, ${registration.state}, ${registration.country}`}
+                                </span>
                             </div>
                         </div>
                     </Card>

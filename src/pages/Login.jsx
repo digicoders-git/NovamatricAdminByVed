@@ -7,7 +7,7 @@ export default function Login({ setAuth }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  // const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const handleLogin = async () => {
     setError("");
