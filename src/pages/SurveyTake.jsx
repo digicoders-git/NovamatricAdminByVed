@@ -54,7 +54,7 @@ const handleSubmit = async () => {
       url = "https://" + url;
     }
 
-    window.open(url, "_blank");
+    window.open(url, "_self");
      setSubmitting(false);
   } catch (error) {
     console.error(error);

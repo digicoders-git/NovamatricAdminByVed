@@ -4,20 +4,19 @@ import { useState } from "react";
 import Login from "./pages/Login";
 import Surveys from "./pages/Surveys";
 import SurveyBuilder from "./pages/SurveyBuilder";
-// import SurveyTake from "./pages/SurveyTake";
 import MainPage from "./pages/MainPage";
 import CompleteServey from "./pages/CompleteServey";
-import TerminateSurvey from './pages/TerminatedSurvey'
+import TerminateSurvey from "./pages/TerminatedSurvey";
 import QuotaFullSurveys from "./pages/QuotaFull";
-import SurveyTake from "./pages/SurveyTake";
 import SurveyFullPage from "./pages/SurveyFullPage";
 import Profile from "./pages/Profile";
 import SurveyResponses from "./pages/Submission";
 import Redirectlinks from "./pages/Redirectlinks";
-// import Registration from "./pages/Registration";
-// import ShowAllRegistration from "./pages/ShowAllRegistration";
 import ShowRegistration from "./pages/ShowAllRegistration";
 import RegistrationDetail from "./pages/RegistrationDetail";
+
+import PublicSurveyGuard from "./pages/PublicSurveyGuard";
+import TotalClick from "./pages/TotalClick";
 
 export default function App() {
   const [auth, setAuth] = useState(Boolean(localStorage.getItem("admin")));
@@ -26,39 +25,35 @@ export default function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* LOGIN PAGE (only when NOT logged in) */}
+        {/* LOGIN */}
         <Route
           path="/login"
-          element={
-            auth ? <Navigate to="/" /> : <Login setAuth={setAuth} />
-          }
+          element={auth ? <Navigate to="/" /> : <Login setAuth={setAuth} />}
         />
 
-        <Route path="/survey/:id" element={<SurveyTake/>} />
-        {/* <Route path="/registration" element={<Registration/>} /> */}
-        {/* PROTECTED ROUTES */}
+        {/* 🌍 PUBLIC SURVEY ROUTE (WITH ACTIVE CHECK) */}
+        <Route path="/survey/:id" element={<PublicSurveyGuard />} />
+
+        {/* 🔐 PROTECTED ROUTES */}
         {auth ? (
           <>
             <Route path="/" element={<MainPage />} />
             <Route path="/surveys" element={<Surveys />} />
             <Route path="/survey-builder" element={<SurveyBuilder />} />
+            <Route path="/total-clicks" element={<TotalClick />} />
             <Route path="/complete-survey" element={<CompleteServey />} />
-            <Route path="/terminate-survey" element={<TerminateSurvey/>} />
-            <Route path="/quota-full-survey" element={<QuotaFullSurveys/>} />
-            <Route path='/survey-view/:id' element={<SurveyFullPage/>}/>
-            <Route path='/survey-response/:id' element={<SurveyResponses/>}/>
-            <Route path='/profile' element={<Profile/>}/>
-            <Route path='/redirect-links' element={<Redirectlinks/>}/>
-            <Route path='/registrations-all' element={<ShowRegistration/>}/>
-            <Route path='/view-registration/:id' element={<RegistrationDetail/>}/>
+            <Route path="/terminate-survey" element={<TerminateSurvey />} />
+            <Route path="/quota-full-survey" element={<QuotaFullSurveys />} />
+            <Route path="/survey-view/:id" element={<SurveyFullPage />} />
+            <Route path="/survey-response/:id" element={<SurveyResponses />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/redirect-links" element={<Redirectlinks />} />
+            <Route path="/registrations-all" element={<ShowRegistration />} />
+            <Route path="/view-registration/:id" element={<RegistrationDetail />} />
           </>
         ) : (
-          /* If NOT logged in, ANY admin route redirects to login */
           <Route path="*" element={<Navigate to="/login" />} />
         )}
-
-        {/* PUBLIC ROUTE FOR TAKING SURVEY */}
-        {/* <Route path="/survey/:id" element={<terminateSurvey />} /> */}
 
       </Routes>
     </BrowserRouter>

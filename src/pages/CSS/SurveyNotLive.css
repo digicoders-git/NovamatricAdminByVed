@@ -1,0 +1,217 @@
+/* SurveyNotLive.css */
+
+.survey-not-live-container {
+  width: 100%;
+  max-width: 500px;
+  animation: fadeIn 0.5s ease-in;
+}
+
+.survey-not-live-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.survey-not-live-card:hover {
+  transform: translateY(-5px);
+}
+
+.survey-header {
+  background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%);
+  color: white;
+  padding: 30px;
+  text-align: center;
+  position: relative;
+}
+
+.company-name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+}
+
+.status-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  padding: 8px 24px;
+  border-radius: 50px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.status-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.survey-content {
+  padding: 40px;
+  text-align: center;
+}
+
+.warning-icon {
+  color: #ff6b6b;
+  margin-bottom: 25px;
+  animation: pulse 2s infinite;
+}
+
+.message-title {
+  color: #2c3e50;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.message-description {
+  color: #666;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.email-link {
+  display: block;
+  color: #3498db;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 10px;
+  transition: color 0.3s ease;
+}
+
+.email-link:hover {
+  color: #2980b9;
+  text-decoration: underline;
+}
+
+.contact-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin: 30px 0;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.calendar-icon {
+  color: #3498db;
+}
+
+.contact-title {
+  color: #2c3e50;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.retry-button,
+.contact-button {
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  min-width: 150px;
+}
+
+.retry-button {
+  background: #3498db;
+  color: white;
+}
+
+.retry-button:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+}
+
+.contact-button {
+  background: transparent;
+  color: #3498db;
+  border: 2px solid #3498db;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contact-button:hover {
+  background: #3498db;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+}
+
+.survey-footer {
+  background: #f8f9fa;
+  padding: 20px;
+  text-align: center;
+  border-top: 1px solid #eaeaea;
+}
+
+.footer-text {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .survey-header {
+    padding: 20px;
+  }
+  
+  .company-name {
+    font-size: 2rem;
+  }
+  
+  .survey-content {
+    padding: 25px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .retry-button,
+  .contact-button {
+    width: 100%;
+  }
+}

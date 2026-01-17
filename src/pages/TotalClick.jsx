@@ -4,7 +4,7 @@ import * as XLSX from "xlsx";
 import DashboardLayout from './Dashboard';
 import './CSS/CompleteServey.css';
 
-const TerminateSurvey = () => {
+const TotalClick = () => {
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -16,23 +16,23 @@ const TerminateSurvey = () => {
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    fetchTerminateSurveys();
+    fetchAllSurveys();
   }, []);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      fetchTerminateSurveys();
+      fetchAllSurveys();
     }, 500); // debounce
 
     return () => clearTimeout(delayDebounce);
   }, [search]);
 
-  const fetchTerminateSurveys = async () => {
+  const fetchAllSurveys = async () => {
     try {
       setLoading(true);
 
       const response = await fetch(
-        `${API_URL}/api/survey/terminate-survey?search=${search}`
+        `${API_URL}/api/survey/all-surveys?search=${search}`
       );
 
       const data = await response.json();
@@ -44,6 +44,48 @@ const TerminateSurvey = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // ---------------- STATUS COLOR FUNCTION ----------------
+  const getStatusColor = (status) => {
+    const statusLower = status?.toLowerCase() || '';
+    
+    switch (statusLower) {
+      case 'terminate':
+        return '#dc2626'; // Red for Terminate
+      case 'complete':
+        return '#059669'; // Green for Complete
+      case 'quota_full':
+        return '#f59e0b'; // Amber for Quota Full
+      default:
+        return '#6b7280'; // Gray for other statuses
+    }
+  };
+
+  // ---------------- GET STATUS BADGE STYLE ----------------
+  const getStatusBadgeStyle = (status) => {
+    const backgroundColor = getStatusColor(status);
+    
+    // Calculate text color based on background brightness
+    const hex = backgroundColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    const textColor = brightness > 128 ? '#ffffff' : '#ffffff';
+    
+    return {
+      backgroundColor,
+      color: textColor,
+      padding: '4px 12px',
+      borderRadius: '20px',
+      fontSize: '12px',
+      fontWeight: '600',
+      textTransform: 'capitalize',
+      display: 'inline-block',
+      minWidth: '80px',
+      textAlign: 'center'
+    };
   };
 
   // ---------------- VIEW RAW DATA ----------------
@@ -60,7 +102,6 @@ const TerminateSurvey = () => {
 
   // ---------------- FORMAT FIELD NAME ----------------
   const formatFieldName = (field) => {
-    // Convert camelCase to Title Case
     return field
       .replace(/([A-Z])/g, ' $1')
       .replace(/^./, str => str.toUpperCase())
@@ -69,7 +110,7 @@ const TerminateSurvey = () => {
 
   // ---------------- CSV EXPORT ----------------
   const exportToCSV = () => {
-    const headers = ['S.No', 'User ID', 'Project ID', 'IP Address', 'Status', 'Terminate At'];
+    const headers = ['S.No', 'User ID', 'Project ID', 'IP Address', 'Status', 'Completed At'];
 
     const csvData = surveys.map((survey, index) => [
       index + 1,
@@ -88,7 +129,7 @@ const TerminateSurvey = () => {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `Terminate_surveys_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `TotalClick_surveys_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
   };
 
@@ -100,13 +141,13 @@ const TerminateSurvey = () => {
       "Project ID": survey.pid,
       "IP Address": survey.ipaddress,
       "Status": survey.status,
-      "Terminate At": new Date(survey.createdAt).toLocaleString()
+      "Completed At": new Date(survey.createdAt).toLocaleString()
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Terminate Surveys");
-    XLSX.writeFile(workbook, `terminate_surveys_${new Date().toISOString().split("T")[0]}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Total Click Surveys");
+    XLSX.writeFile(workbook, `total_click_surveys_${new Date().toISOString().split("T")[0]}.xlsx`);
   };
 
   // ---------------- PDF EXPORT ----------------
@@ -117,7 +158,7 @@ const TerminateSurvey = () => {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Terminate Surveys Report</title>
+          <title>Total Click Surveys Report</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; }
             h1 { color: #2563eb; text-align: center; margin-bottom: 30px; }
@@ -126,10 +167,23 @@ const TerminateSurvey = () => {
             th { background-color: #2563eb; color: white; }
             tr:nth-child(even) { background-color: #f9fafb; }
             .complete-footer { margin-top: 30px; text-align: center; color: #666; }
+            .status-badge { 
+              padding: 4px 12px; 
+              border-radius: 20px; 
+              font-size: 12px; 
+              font-weight: 600; 
+              text-transform: capitalize; 
+              display: inline-block; 
+              min-width: 80px; 
+              text-align: center; 
+            }
+            .terminate { background-color: #dc2626; color: white; }
+            .complete { background-color: #059669; color: white; }
+            .quota_full { background-color: #f59e0b; color: white; }
           </style>
         </head>
         <body>
-          <h1>Terminate Surveys Report</h1>
+          <h1>Total Click Surveys Report</h1>
           <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
           <table>
             <thead>
@@ -139,7 +193,7 @@ const TerminateSurvey = () => {
                 <th>Project ID</th>
                 <th>IP Address</th>
                 <th>Status</th>
-                <th>Terminate At</th>
+                <th>Completed At</th>
               </tr>
             </thead>
             <tbody>
@@ -149,14 +203,18 @@ const TerminateSurvey = () => {
                   <td>${survey.uid}</td>
                   <td>${survey.pid}</td>
                   <td>${survey.ipaddress}</td>
-                  <td>${survey.status}</td>
+                  <td>
+                    <span class="status-badge ${survey.status.toLowerCase()}">
+                      ${survey.status}
+                    </span>
+                  </td>
                   <td>${new Date(survey.createdAt).toLocaleString()}</td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
           <div class="complete-footer">
-            <p>Total Terminate Surveys: ${surveys.length}</p>
+            <p>Total Surveys: ${surveys.length}</p>
           </div>
         </body>
       </html>
@@ -171,6 +229,11 @@ const TerminateSurvey = () => {
     }, 250);
   };
 
+  // ---------------- GET STATUS COUNT ----------------
+  const getStatusCount = (status) => {
+    return surveys.filter(survey => survey.status?.toLowerCase() === status.toLowerCase()).length;
+  };
+
   // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -181,7 +244,7 @@ const TerminateSurvey = () => {
     return (
       <div className="complete-loading-container">
         <div className="complete-spinner"></div>
-        <p className="complete-loading-text">Loading Terminate surveys...</p>
+        <p className="complete-loading-text">Loading surveys...</p>
       </div>
     );
   }
@@ -194,8 +257,8 @@ const TerminateSurvey = () => {
           <div className="complete-header">
 
             <div className="complete-title-section">
-              <h1>📊 Terminate Surveys</h1>
-              {/* <p className="complete-subtitle">Track and manage all terminate survey responses</p> */}
+              <h1>📊 Total Click</h1>
+              {/* <p className="complete-subtitle">Track and manage all survey responses</p> */}
             </div>
 
             <div className="complete-export-section">
@@ -228,7 +291,7 @@ const TerminateSurvey = () => {
           <div className="complete-table-container">
             {surveys.length === 0 ? (
               <div className="complete-empty-state">
-                <h3>No Terminate Surveys Found</h3>
+                <h3>No Surveys Found</h3>
                 <p>Try changing the search keywords.</p>
               </div>
             ) : (
@@ -242,7 +305,7 @@ const TerminateSurvey = () => {
                         <th>Project ID</th>
                         <th>IP Address</th>
                         <th>Status</th>
-                        <th>Terminate At</th>
+                        <th>Completed At</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
@@ -255,7 +318,9 @@ const TerminateSurvey = () => {
                           <td>{survey.pid}</td>
                           <td>{survey.ipaddress}</td>
                           <td>
-                            <span className="terminate-status-badge">{survey.status}</span>
+                            <span style={getStatusBadgeStyle(survey.status)}>
+                              {survey.status}
+                            </span>
                           </td>
                           <td>{new Date(survey.createdAt).toLocaleString()}</td>
                           <td>
@@ -308,7 +373,7 @@ const TerminateSurvey = () => {
         <div className="complete-modal-overlay" onClick={closeModal}>
           <div className="complete-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="complete-modal-header">
-              <h2>📋 Terminate Survey Raw Data</h2>
+              <h2>📋 Survey Raw Data</h2>
               <button className="complete-modal-close" onClick={closeModal}>
                 &times;
               </button>
@@ -330,10 +395,14 @@ const TerminateSurvey = () => {
                 </div>
                 <div className="complete-info-row">
                   <span className="complete-info-label">Status:</span>
-                  <span className="complete-info-value">{selectedSurvey.status}</span>
+                  <span className="complete-info-value">
+                    <span style={getStatusBadgeStyle(selectedSurvey.status)}>
+                      {selectedSurvey.status}
+                    </span>
+                  </span>
                 </div>
                 <div className="complete-info-row">
-                  <span className="complete-info-label">Terminate At:</span>
+                  <span className="complete-info-label">Completed At:</span>
                   <span className="complete-info-value">
                     {new Date(selectedSurvey.createdAt).toLocaleString()}
                   </span>
@@ -351,7 +420,7 @@ const TerminateSurvey = () => {
                   </thead>
                   <tbody>
                     {Object.entries(selectedSurvey)
-                      .filter(([key]) => key !== "_id" && key !== "__v") // id & v remove
+                      .filter(([key]) => key !== "_id" && key !== "__v")
                       .map(([key, value]) => (
                         <tr key={key}>
                           <td className="complete-raw-field">
@@ -360,7 +429,6 @@ const TerminateSurvey = () => {
                           </td>
                           <td className="complete-raw-value">
                             {key === "createdAt" ? (
-                              // formatted date & time
                               new Date(value).toLocaleString("en-IN", {
                                 day: "2-digit",
                                 month: "short",
@@ -380,7 +448,6 @@ const TerminateSurvey = () => {
                         </tr>
                       ))}
                   </tbody>
-
                 </table>
               </div>
 
@@ -397,4 +464,4 @@ const TerminateSurvey = () => {
   );
 };
 
-export default TerminateSurvey;
+export default TotalClick;

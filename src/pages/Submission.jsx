@@ -13,7 +13,7 @@ export default function SurveyResponses() {
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-
+    const [surveyName,setSurveyName] = useState('')
     const navigate = useNavigate();
     const surveyId = window.location.pathname.split("/").pop();
     const API_URL = import.meta.env.VITE_API_URL;
@@ -23,6 +23,8 @@ export default function SurveyResponses() {
             try {
                 const surveyRes = await axios.get(`${API_URL}/api/survey/getServey/${surveyId}`);
                 const surveyData = surveyRes.data.data;
+                console.log(surveyData);
+                setSurveyName(surveyData.surveyName)
                 setQuestions(surveyData.questions || []);
 
                 const submissionRes = await axios.get(
@@ -174,6 +176,8 @@ export default function SurveyResponses() {
                         <thead>
                             <tr>
                                 <th className="submission-header">Sr No.</th>
+                                <th className="submission-header">Survey Name</th>
+
                                 {questions.map((q) => (
                                     <th key={q._id} className="submission-header">
                                         {q.questionText}
@@ -195,6 +199,9 @@ export default function SurveyResponses() {
                                     <tr key={s._id} className="submission-row">
                                         <td className="submission-cell">
                                             {(currentPage - 1) * rowsPerPage + index + 1}
+                                        </td>
+                                        <td className="submission-cell">
+                                            {surveyName}
                                         </td>
 
                                         {questions.map((q) => {

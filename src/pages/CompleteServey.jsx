@@ -24,10 +24,11 @@ const CompleteServey = () => {
       const response = await fetch(
         `${API_URL}/api/survey/complete-survey?search=${searchText}`
       );
-      
+
       const data = await response.json();
       console.log(data);
-      
+
+
       if (data.success) {
         setSurveys(data.data || []);
       }
@@ -41,7 +42,7 @@ const CompleteServey = () => {
   // ---------------- VIEW RAW DATA ----------------
   const handleViewRawData = (survey) => {
     console.log("hello");
-    
+
     setSelectedSurvey(survey);
     setShowModal(true);
   };
@@ -66,8 +67,8 @@ const CompleteServey = () => {
     const headers = ['S.No', 'User ID', 'Project ID', 'IP Address', 'Status', 'Completed At'];
     const csvData = surveys.map((s, idx) => [
       idx + 1,
-      s.userId,
-      s.projectId,
+      s.uid,
+      s.pid,
       s.ipaddress,
       s.status,
       new Date(s.createdAt).toLocaleString()
@@ -86,8 +87,8 @@ const CompleteServey = () => {
   const exportToExcel = () => {
     const excelData = surveys.map((s, idx) => ({
       "S.No": idx + 1,
-      "User ID": s.userId,
-      "Project ID": s.projectId,
+      "User ID": s.uid,
+      "Project ID": s.pid,
       "IP Address": s.ipaddress,
       "Status": s.status,
       "Completed At": new Date(s.createdAt).toLocaleString()
@@ -138,8 +139,8 @@ const CompleteServey = () => {
               ${surveys.map((s, i) => `
                 <tr>
                   <td>${i + 1}</td>
-                  <td>${s.userId}</td>
-                  <td>${s.projectId}</td>
+                  <td>${s.uid}</td>
+                  <td>${s.pid}</td>
                   <td>${s.ipaddress}</td>
                   <td>${s.status}</td>
                   <td>${new Date(s.createdAt).toLocaleString()}</td>
@@ -187,7 +188,7 @@ const CompleteServey = () => {
           <div className="complete-header">
             <div className="complete-title-section">
               <h1>📊 Completed Surveys</h1>
-              <p className="complete-subtitle">Track and manage completed survey responses</p>
+              {/* <p className="complete-subtitle">Track and manage completed survey responses</p> */}
             </div>
 
             {/* ---------- EXPORT BUTTONS ---------- */}
@@ -242,8 +243,8 @@ const CompleteServey = () => {
                       {currentItems.map((survey, i) => (
                         <tr key={survey._id}>
                           <td>{indexFirst + i + 1}</td>
-                          <td>{survey.userId}</td>
-                          <td>{survey.projectId}</td>
+                          <td>{survey.uid}</td>
+                          <td>{survey.pid}</td>
                           <td>{survey.ipaddress}</td>
                           <td>
                             <span className="complete-status-badge">{survey.status}</span>
@@ -304,16 +305,16 @@ const CompleteServey = () => {
                 &times;
               </button>
             </div>
-            
+
             <div className="complete-modal-body">
               <div className="complete-raw-data-info">
                 <div className="complete-info-row">
                   <span className="complete-info-label">User ID:</span>
-                  <span className="complete-info-value">{selectedSurvey.userId}</span>
+                  <span className="complete-info-value">{selectedSurvey.uid}</span>
                 </div>
                 <div className="complete-info-row">
                   <span className="complete-info-label">Project ID:</span>
-                  <span className="complete-info-value">{selectedSurvey.projectId}</span>
+                  <span className="complete-info-value">{selectedSurvey.pid}</span>
                 </div>
                 <div className="complete-info-row">
                   <span className="complete-info-label">Status:</span>
@@ -337,24 +338,37 @@ const CompleteServey = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.entries(selectedSurvey).map(([key, value]) => (
-                      <tr key={key}>
-                        <td className="complete-raw-field">
-                          <strong>{formatFieldName(key)}</strong>
-                          <div className="complete-field-key">({key})</div>
-                        </td>
-                        <td className="complete-raw-value">
-                          {typeof value === 'object' && value !== null ? (
-                            <pre className="complete-json-view">
-                              {JSON.stringify(value, null, 2)}
-                            </pre>
-                          ) : (
-                            String(value)
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                    {Object.entries(selectedSurvey)
+                      .filter(([key]) => key !== "_id" && key !== "__v") // id & v remove
+                      .map(([key, value]) => (
+                        <tr key={key}>
+                          <td className="complete-raw-field">
+                            <strong>{formatFieldName(key)}</strong>
+                            <div className="complete-field-key">({key})</div>
+                          </td>
+                          <td className="complete-raw-value">
+                            {key === "createdAt" ? (
+                              // formatted date & time
+                              new Date(value).toLocaleString("en-IN", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                              })
+                            ) : typeof value === "object" && value !== null ? (
+                              <pre className="complete-json-view">
+                                {JSON.stringify(value, null, 2)}
+                              </pre>
+                            ) : (
+                              String(value)
+                            )}
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
+
                 </table>
               </div>
 
