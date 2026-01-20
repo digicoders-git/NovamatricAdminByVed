@@ -75,7 +75,7 @@ export default function Login({ setAuth }) {
           </div>
           <div className="brand-footer">
             <br />
-            <p>&copy; 2025 Novametric Research. All rights reserved.</p>
+            <p>&copy; 2026 Novametric Research. All rights reserved.</p>
           </div>
         </div>
 

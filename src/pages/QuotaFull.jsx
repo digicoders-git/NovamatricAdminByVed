@@ -73,8 +73,8 @@ const QuotaFullSurveys = () => {
 
     const csvData = surveys.map((survey, index) => [
       index + 1,
-      survey.uid,
-      survey.pid,
+      survey.rawData.uid || "N/A",
+      survey.rawData.pid || "N/A",
       survey.ipaddress,
       survey.status,
       new Date(survey.createdAt).toLocaleString()
@@ -96,8 +96,8 @@ const QuotaFullSurveys = () => {
   const exportToExcel = () => {
     const excelData = surveys.map((survey, index) => ({
       "S.No": index + 1,
-      "User ID": survey.uid,
-      "Project ID": survey.pid,
+      "User ID": survey.rawData.uid || "N/A",
+      "Project ID": survey.rawData.pid || "N/A",
       "IP Address": survey.ipaddress,
       "Status": survey.status,
       "Quota Full At": new Date(survey.createdAt).toLocaleString()
@@ -148,8 +148,8 @@ const QuotaFullSurveys = () => {
               ${surveys.map((survey, index) => `
                 <tr>
                   <td>${index + 1}</td>
-                  <td>${survey.uid}</td>
-                  <td>${survey.pid}</td>
+                  <td>${survey.rawData.uid || "N/A"}</td>
+                  <td>${survey.rawData.pid || "N/A"}</td>
                   <td>${survey.ipaddress}</td>
                   <td><span class="status-qf">${survey.status}</span></td>
                   <td>${new Date(survey.createdAt).toLocaleString()}</td>
@@ -246,8 +246,8 @@ const QuotaFullSurveys = () => {
                       {currentItems.map((survey, idx) => (
                         <tr key={survey._id}>
                           <td>{indexOfFirst + idx + 1}</td>
-                          <td>{survey.uid}</td>
-                          <td>{survey.pid}</td>
+                          <td>{survey.rawData.uid || "N/A"}</td>
+                          <td>{survey.rawData.pid || "N/A"}</td>
                           <td>{survey.ipaddress}</td>
                           <td>
                             <span className="complete-status-quota-full">
@@ -316,11 +316,11 @@ const QuotaFullSurveys = () => {
               <div className="complete-raw-data-info">
                 <div className="complete-info-row">
                   <span className="complete-info-label">User ID:</span>
-                  <span className="complete-info-value">{selectedSurvey.uid}</span>
+                  <span className="complete-info-value">{selectedSurvey.rawData.uid || "N/A"}</span>
                 </div>
                 <div className="complete-info-row">
                   <span className="complete-info-label">Project ID:</span>
-                  <span className="complete-info-value">{selectedSurvey.pid}</span>
+                  <span className="complete-info-value">{selectedSurvey.rawData.pid || "N/A"}</span>
                 </div>
                 <div className="complete-info-row">
                   <span className="complete-info-label">IP Address:</span>

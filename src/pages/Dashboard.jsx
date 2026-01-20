@@ -5,8 +5,17 @@ import {
   Home,
   BarChart3,
   Users,
-  ChevronDown
+  ChevronDown,
+  ClipboardList,
+  MousePointerClick,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Link,
+  PlusCircle,
+  FileText
 } from 'lucide-react';
+
 import { NavLink } from 'react-router-dom';
 import './CSS/Dashboard.css';
 
@@ -50,16 +59,25 @@ const DashboardLayout = ({ children }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const sidebarItems = [
-    { label: 'Home', icon: Home, path: '/' },
-    { label: 'Servey List', icon: BarChart3, path: '/surveys' },
-    { label: 'Total Clicks', icon: Users, path: '/total-clicks/' },
-    { label: 'Completed List', icon: Users, path: '/complete-survey' },
-    { label: 'Terminated List', icon: Users, path: '/terminate-survey' },
-    { label: 'Quota Full List', icon: Users, path: '/quota-full-survey' },
-    { label: 'Redirect Links', icon: Users, path: '/redirect-links' },
-    { label: 'Registration', icon: Users, path: '/registrations-all' },
-  ];
+const sidebarItems = [
+  { label: 'Home', icon: Home, path: '/' },
+
+  { label: 'Survey List', icon: ClipboardList, path: '/surveys' },
+
+  { label: 'Total Clicks', icon: MousePointerClick, path: '/total-clicks/' },
+
+  { label: 'Completed List', icon: CheckCircle, path: '/complete-survey' },
+
+  { label: 'Terminated List', icon: XCircle, path: '/terminate-survey' },
+
+  { label: 'Quota Full List', icon: AlertTriangle, path: '/quota-full-survey' },
+
+  { label: 'Redirect Links', icon: Link, path: '/redirect-links' },
+
+  { label: 'Create Links', icon: PlusCircle, path: '/create-links' },
+
+  { label: 'Registration', icon: FileText, path: '/registrations-all' },
+];
 
   return (
     <div className="dashboard">

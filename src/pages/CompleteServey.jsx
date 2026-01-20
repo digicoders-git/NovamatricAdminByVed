@@ -67,8 +67,8 @@ const CompleteServey = () => {
     const headers = ['S.No', 'User ID', 'Project ID', 'IP Address', 'Status', 'Completed At'];
     const csvData = surveys.map((s, idx) => [
       idx + 1,
-      s.uid,
-      s.pid,
+      s.rawData.uid || "N/A",
+      s.rawData.pid || "N/A",
       s.ipaddress,
       s.status,
       new Date(s.createdAt).toLocaleString()
@@ -87,8 +87,8 @@ const CompleteServey = () => {
   const exportToExcel = () => {
     const excelData = surveys.map((s, idx) => ({
       "S.No": idx + 1,
-      "User ID": s.uid,
-      "Project ID": s.pid,
+      "User ID": s.rawData.uid || "N/A",
+      "Project ID": s.rawData.pid || "N/A",
       "IP Address": s.ipaddress,
       "Status": s.status,
       "Completed At": new Date(s.createdAt).toLocaleString()
@@ -139,8 +139,8 @@ const CompleteServey = () => {
               ${surveys.map((s, i) => `
                 <tr>
                   <td>${i + 1}</td>
-                  <td>${s.uid}</td>
-                  <td>${s.pid}</td>
+                  <td>${s.rawData.uid || "N/A"}</td>
+                  <td>${s.rawData.pid || "N/A"}</td>
                   <td>${s.ipaddress}</td>
                   <td>${s.status}</td>
                   <td>${new Date(s.createdAt).toLocaleString()}</td>
@@ -243,9 +243,9 @@ const CompleteServey = () => {
                       {currentItems.map((survey, i) => (
                         <tr key={survey._id}>
                           <td>{indexFirst + i + 1}</td>
-                          <td>{survey.uid}</td>
-                          <td>{survey.pid}</td>
-                          <td>{survey.ipaddress}</td>
+                          <td>{survey.rawData.uid || "NA"}</td>
+                          <td>{survey.rawData.pid || "NA"}</td>
+                          <td>{survey.ipaddress || "NA"}</td>
                           <td>
                             <span className="complete-status-badge">{survey.status}</span>
                           </td>
@@ -310,11 +310,11 @@ const CompleteServey = () => {
               <div className="complete-raw-data-info">
                 <div className="complete-info-row">
                   <span className="complete-info-label">User ID:</span>
-                  <span className="complete-info-value">{selectedSurvey.uid}</span>
+                  <span className="complete-info-value">{selectedSurvey.rawData.uid || "N/A"}</span>
                 </div>
                 <div className="complete-info-row">
                   <span className="complete-info-label">Project ID:</span>
-                  <span className="complete-info-value">{selectedSurvey.pid}</span>
+                  <span className="complete-info-value">{selectedSurvey.rawData.pid || "N/A"}</span>
                 </div>
                 <div className="complete-info-row">
                   <span className="complete-info-label">Status:</span>
