@@ -23,7 +23,6 @@ const DashboardLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   const dropdownRef = useRef(null);
 
   // Logout Function
@@ -47,6 +46,7 @@ const DashboardLayout = ({ children }) => {
 
   // Handle resizing for mobile/desktop sidebar
   useEffect(() => {
+
     const handleResize = () => {
       const mobile = window.innerWidth <= 1024;
       setIsMobile(mobile);

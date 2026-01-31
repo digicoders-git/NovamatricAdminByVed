@@ -32,10 +32,12 @@ const TotalClick = () => {
       setLoading(true);
 
       const response = await fetch(
-        `${API_URL}/api/survey/all-surveys?search=${search}`
+        `${API_URL}/api/survey/get-clicks?search=${search}`
       );
 
       const data = await response.json();
+      console.log(data);
+      
       if (data.success) {
         setSurveys(data.data || []);
       }
@@ -114,10 +116,10 @@ const TotalClick = () => {
 
     const csvData = surveys.map((survey, index) => [
       index + 1,
-      survey.uid,
-      survey.pid,
-      survey.ipaddress,
-      survey.status,
+      survey?.dynamicFields?.uid || "",
+      survey?.dynamicFields?.pid || "",
+      survey.ipaddress  || "",
+      survey.status  || "",
       new Date(survey.createdAt).toLocaleString()
     ]);
 
@@ -137,9 +139,9 @@ const TotalClick = () => {
   const exportToExcel = () => {
     const excelData = surveys.map((survey, index) => ({
       "S.No": index + 1,
-      "User ID": survey.uid,
-      "Project ID": survey.pid,
-      "IP Address": survey.ipaddress,
+      "User ID": survey?.dynamicFields?.uid  || "",
+      "Project ID": survey?.dynamicFields?.pid  || "",
+      "IP Address": survey.ipaddress  || "",
       "Status": survey.status,
       "Completed At": new Date(survey.createdAt).toLocaleString()
     }));
@@ -200,8 +202,8 @@ const TotalClick = () => {
               ${surveys.map((survey, index) => `
                 <tr>
                   <td>${index + 1}</td>
-                  <td>${survey.uid}</td>
-                  <td>${survey.pid}</td>
+                  <td>${survey?.dynamicFields?.uid  || ""}</td>
+                  <td>${survey?.dynamicFields.pid  || ""}</td>
                   <td>${survey.ipaddress}</td>
                   <td>
                     <span class="status-badge ${survey.status.toLowerCase()}">
@@ -240,14 +242,7 @@ const TotalClick = () => {
   const currentItems = surveys.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(surveys.length / itemsPerPage);
 
-  if (loading) {
-    return (
-      <div className="complete-loading-container">
-        <div className="complete-spinner"></div>
-        <p className="complete-loading-text">Loading surveys...</p>
-      </div>
-    );
-  }
+  
 
   return (
     <DashboardLayout>
@@ -288,8 +283,14 @@ const TotalClick = () => {
 
           </div>
 
+          {/* TABLE CONTAINER WITH LOADING STATE */}
           <div className="complete-table-container">
-            {surveys.length === 0 ? (
+            {loading ? (
+              <div className="complete-loading-content">
+                <div className="complete-spinner"></div>
+                <p className="complete-loading-text">Loading surveys...</p>
+              </div>
+            ) : surveys.length === 0 ? (
               <div className="complete-empty-state">
                 <h3>No Surveys Found</h3>
                 <p>Try changing the search keywords.</p>
@@ -314,8 +315,8 @@ const TotalClick = () => {
                       {currentItems.map((survey, index) => (
                         <tr key={survey._id}>
                           <td>{indexOfFirstItem + index + 1}</td>
-                          <td>{survey.uid}</td>
-                          <td>{survey.pid}</td>
+                          <td>{survey?.dynamicFields.uid  || "N/A"}</td>
+                          <td>{survey?.dynamicFields?.pid  || "N/A"}</td>
                           <td>{survey.ipaddress}</td>
                           <td>
                             <span style={getStatusBadgeStyle(survey.status)}>

@@ -56,7 +56,7 @@ export default function Login({ setAuth }) {
             </div>
           {/* </div> */}
           <div className="brand-content">
-            <h1 className="company-name">Novametric Research</h1>
+            {/* <h1 className="company-name">Novametric Research</h1> */}
             <p className="brand-tagline">Welcome to the Admin Portal</p>
             <div className="brand-features">
               <div className="feature-item">

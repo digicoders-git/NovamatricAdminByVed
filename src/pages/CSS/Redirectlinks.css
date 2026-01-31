@@ -52,6 +52,7 @@
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow-x: auto;
 }
 
 /* Table Styles */
@@ -159,7 +160,6 @@
 /* Loading */
 .loading {
   text-align: center;
-  padding: 3rem;
 }
 
 .spinner {
@@ -173,8 +173,8 @@
 }
 
 .loading p {
-  margin-top: 1rem;
   color: #6B7280;
+  margin-top: 1rem;
 }
 
 /* Modal */
@@ -507,17 +507,341 @@ input:checked + .slider:before {
   color: #6B7280;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #E5E7EB;
-  border-top: 3px solid #10B981;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+/* URL Cell Styling */
+.url-cell {
+  max-width: 300px;
+  min-width: 250px;
+}
+
+.url-display-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: #F9FAFB;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.url-display-container:hover {
+  border-color: #3B82F6;
+  background: #F0F9FF;
+}
+
+.url-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.url-text-container {
+  flex: 1;
+  min-width: 0; /* Important for text truncation */
+}
+
+.url-text {
+  display: block;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  direction: ltr;
+  line-height: 1.4;
+}
+
+.url-text:hover {
+  color: #3B82F6;
+}
+
+/* Full URL Modal */
+.full-url-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 800px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+}
+
+.full-url-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.full-url-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1F2937;
+  margin: 0;
+}
+
+.full-url-content {
+  background: #F9FAFB;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.full-url-text {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  color: #374151;
+  word-break: break-all;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.full-url-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.full-url-copy-btn {
+  padding: 0.625rem 1.25rem;
+  background: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.full-url-close-btn {
+  padding: 0.625rem 1.25rem;
+  background: #6B7280;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Toggle group */
+.toggle-group {
+  background: #F9FAFB;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #E5E7EB;
+}
+
+.toggle-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.toggle-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Redirect links section */
+.redirect-links-section {
+  margin-top: 20px;
+  padding: 20px;
+  background: #F9FAFB;
+  border-radius: 12px;
+  border: 1px solid #E5E7EB;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
   margin-bottom: 16px;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.redirect-link-item {
+  margin-bottom: 16px;
 }
+
+.redirect-inputs {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.redirect-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.redirect-input:focus {
+  outline: none;
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.delete-redirect-btn {
+  background: #FEE2E2;
+  border: 1px solid #FCA5A5;
+  color: #DC2626;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.delete-redirect-btn:hover:not(:disabled) {
+  background: #FECACA;
+}
+
+.delete-redirect-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.add-redirect-btn {
+  background: #EFF6FF;
+  border: 1px dashed #3B82F6;
+  color: #1D4ED8;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.add-redirect-btn:hover {
+  background: #DBEAFE;
+}
+
+/* Redirect badge in table */
+.redirect-count {
+  display: flex;
+  align-items: center;
+}
+
+.redirect-badge {
+  background: #E0E7FF;
+  color: #3730A3;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.no-redirects {
+  color: #9CA3AF;
+  font-size: 14px;
+}
+
+/* Help text */
+.help-text {
+  display: block;
+  color: #6B7280;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+/* Switch styling */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #D1D5DB;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #10B981;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* Tooltip for URL */
+.url-display-container[title] {
+  position: relative;
+}
+
+.url-display-container[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: #374151;
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  white-space: normal;
+  max-width: 400px;
+  word-break: break-all;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Required field indicator */
+.required {
+  color: #EF4444;
+  margin-left: 4px;
+}
+
+

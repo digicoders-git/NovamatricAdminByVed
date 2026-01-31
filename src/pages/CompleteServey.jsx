@@ -21,13 +21,13 @@ const CompleteServey = () => {
   // ---------------- SERVER SIDE SEARCH + FETCH ----------------
   const fetchCompletedSurveys = async (searchText = "") => {
     try {
+      setLoading(true);
       const response = await fetch(
         `${API_URL}/api/survey/complete-survey?search=${searchText}`
       );
 
       const data = await response.json();
       console.log(data);
-
 
       if (data.success) {
         setSurveys(data.data || []);
@@ -39,10 +39,18 @@ const CompleteServey = () => {
     }
   };
 
+  // ---------------- DEBOUNCE SEARCH ----------------
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      fetchCompletedSurveys(search);
+    }, 500); // debounce 500ms
+
+    return () => clearTimeout(delayDebounce);
+  }, [search]);
+
   // ---------------- VIEW RAW DATA ----------------
   const handleViewRawData = (survey) => {
     console.log("hello");
-
     setSelectedSurvey(survey);
     setShowModal(true);
   };
@@ -170,14 +178,7 @@ const CompleteServey = () => {
   const currentItems = surveys.slice(indexFirst, indexLast);
   const totalPages = Math.ceil(surveys.length / itemsPerPage);
 
-  if (loading) {
-    return (
-      <div className="complete-loading-container">
-        <div className="complete-spinner"></div>
-        <p className="complete-loading-text">Loading completed surveys...</p>
-      </div>
-    );
-  }
+  // ✅ EARLY RETURN हटा दिया - यह लाइन हटा दी है
 
   return (
     <DashboardLayout>
@@ -203,23 +204,28 @@ const CompleteServey = () => {
                 <FileDown size={18} /> Export PDF
               </button>
             </div>
+            
+            {/* 🔍 SEARCH BOX */}
             <div className="complete-search-box">
               <input
                 type="text"
                 className="complete-search-input"
                 placeholder="Search User ID, Project ID, IP, Status..."
                 value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  fetchCompletedSurveys(e.target.value);
-                }}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </div>
           </div>
 
-          {/* ---------- TABLE SECTION ---------- */}
+          {/* ---------- TABLE SECTION WITH LOADING STATE ---------- */}
           <div className="complete-table-container">
-            {surveys.length === 0 ? (
+            {loading ? (
+              // लोडिंग स्टेट - सिर्फ टेबल की जगह पर
+              <div className="complete-loading-content">
+                <div className="complete-spinner"></div>
+                <p className="complete-loading-text">Loading completed surveys...</p>
+              </div>
+            ) : surveys.length === 0 ? (
               <div className="complete-empty-state">
                 <h3>No Completed Surveys</h3>
                 <p>Try adjusting your search filter.</p>

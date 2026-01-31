@@ -67,6 +67,7 @@ const Surveys = () => {
         `${API_URL}/api/survey/getServey?page=${page}&limit=${limit}&search=${searchTerm}&sortBy=${sortBy}&sortOrder=${sortOrder}`
       );
       const result = await res.json();
+console.log(result);
 
       if (result.success) {
         const updated = result.data.map(s => {
@@ -169,6 +170,8 @@ const Surveys = () => {
                     <th onClick={() => handleSort('_id')}>Sr No <ArrowUpDown size={14} /></th>
                     <th onClick={() => handleSort('surveyName')}>Survey Name <ArrowUpDown size={14} /></th>
                     {/* <th>Description</th> */}
+                    <th>Client Project ID</th>
+                    <th>Internal Project ID</th>
                     <th>Survey Link</th>
                     <th>Status</th>
                     <th>View</th>
@@ -182,6 +185,8 @@ const Surveys = () => {
                     <tr key={survey._id}>
                       <td>{(page - 1) * limit + index + 1}</td>
                       <td>{survey.surveyName}</td>
+                      <td>{survey.projectIDfromClient}</td>
+                      <td>{survey.projectIDfromInter}</td>
                       {/* <td>{survey.description || "No description"}</td> */}
 
                       <td>

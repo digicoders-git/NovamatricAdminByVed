@@ -177,14 +177,7 @@ const TerminateSurvey = () => {
   const currentItems = surveys.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(surveys.length / itemsPerPage);
 
-  if (loading) {
-    return (
-      <div className="complete-loading-container">
-        <div className="complete-spinner"></div>
-        <p className="complete-loading-text">Loading Terminate surveys...</p>
-      </div>
-    );
-  }
+  // ✅ REMOVED THE EARLY RETURN - यह लाइन हटा दी है
 
   return (
     <DashboardLayout>
@@ -225,8 +218,15 @@ const TerminateSurvey = () => {
 
           </div>
 
+          {/* TABLE CONTAINER WITH LOADING STATE */}
           <div className="complete-table-container">
-            {surveys.length === 0 ? (
+            {loading ? (
+              // लोडिंग स्टेट - सिर्फ टेबल की जगह पर
+              <div className="complete-loading-content">
+                <div className="complete-spinner"></div>
+                <p className="complete-loading-text">Loading Terminate surveys...</p>
+              </div>
+            ) : surveys.length === 0 ? (
               <div className="complete-empty-state">
                 <h3>No Terminate Surveys Found</h3>
                 <p>Try changing the search keywords.</p>

@@ -173,15 +173,6 @@ const QuotaFullSurveys = () => {
   const currentItems = surveys.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(surveys.length / itemsPerPage);
 
-  if (loading) {
-    return (
-      <div className="complete-loading-container">
-        <div className="complete-spinner"></div>
-        <p className="complete-loading-text">Loading quota full surveys...</p>
-      </div>
-    );
-  }
-
   return (
     <DashboardLayout>
       <div className="complete-main-container">
@@ -220,9 +211,15 @@ const QuotaFullSurveys = () => {
 
           </div>
 
-          {/* TABLE */}
+          {/* TABLE CONTAINER WITH LOADING STATE */}
           <div className="complete-table-container">
-            {surveys.length === 0 ? (
+            {loading ? (
+              // लोडिंग स्टेट - सिर्फ टेबल की जगह पर
+              <div className="complete-loading-content">
+                <div className="complete-spinner"></div>
+                <p className="complete-loading-text">Loading quota full surveys...</p>
+              </div>
+            ) : surveys.length === 0 ? (
               <div className="complete-empty-state">
                 <h3>No Quota Full Surveys Found</h3>
                 <p>Try changing your search.</p>

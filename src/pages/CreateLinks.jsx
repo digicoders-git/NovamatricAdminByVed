@@ -6,17 +6,21 @@ const CreateLinks = () => {
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showUrlModal, setShowUrlModal] = useState(false);
+  const [selectedUrl, setSelectedUrl] = useState("");
   
-  const [dynamicParams, setDynamicParams] = useState([
-    { id: 1, key: "pid", value: "1123" },
-    { id: 2, key: "uid", value: "12134" }
-  ]);
-
+  const [dynamicParams, setDynamicParams] = useState([]); // Empty array se start karo
   const [newParam, setNewParam] = useState({ key: "", value: "" });
   const [status, setStatus] = useState("complete");
   const [linkName, setLinkName] = useState("");
   const [generatedLink, setGeneratedLink] = useState("");
   const [notification, setNotification] = useState(null);
+
+  const [enableMultipleRedirects, setEnableMultipleRedirects] = useState(false);
+  const [redirectLinks, setRedirectLinks] = useState([
+    { id: 1, url: "", name: "" }
+  ]);
+  const [nextRedirectId, setNextRedirectId] = useState(2);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -46,7 +50,10 @@ const CreateLinks = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const openModal = () => setShowModal(true);
+  const openModal = () => {
+    setShowModal(true);
+    resetForm();
+  };
 
   const closeModal = () => {
     setShowModal(false);
@@ -54,26 +61,26 @@ const CreateLinks = () => {
   };
 
   const resetForm = () => {
-    setDynamicParams([
-      { id: 1, key: "pid", value: "1123" },
-      { id: 2, key: "uid", value: "12134" }
-    ]);
+    setDynamicParams([]); // Empty parameters
     setNewParam({ key: "", value: "" });
     setStatus("complete");
     setLinkName("");
     setGeneratedLink("");
+    setEnableMultipleRedirects(false);
+    setRedirectLinks([{ id: 1, url: "", name: "" }]);
+    setNextRedirectId(2);
   };
 
   const addParam = () => {
-    if (!newParam.key.trim() || !newParam.value.trim()) {
-      showNotification("Both key and value are required!", "error");
+    if (!newParam.key.trim()) {
+      showNotification("Key is required!", "error");
       return;
     }
 
     const newId = Math.max(...dynamicParams.map(p => p.id), 0) + 1;
     setDynamicParams([
       ...dynamicParams,
-      { id: newId, key: newParam.key, value: newParam.value }
+      { id: newId, key: newParam.key.trim(), value: newParam.value.trim() }
     ]);
     setNewParam({ key: "", value: "" });
     showNotification("Parameter added!");
@@ -92,26 +99,52 @@ const CreateLinks = () => {
     );
   };
 
-  const generateLink = () => {
+  const addRedirectLink = () => {
+    setRedirectLinks([
+      ...redirectLinks,
+      { id: nextRedirectId, url: "", name: "" }
+    ]);
+    setNextRedirectId(nextRedirectId + 1);
+  };
+
+  const removeRedirectLink = (id) => {
+    if (redirectLinks.length === 1) {
+      showNotification("At least one redirect link is required", "error");
+      return;
+    }
+    setRedirectLinks(redirectLinks.filter(link => link.id !== id));
+    showNotification("Redirect link removed", "info");
+  };
+
+  const updateRedirectLink = (id, field, value) => {
+    setRedirectLinks(
+      redirectLinks.map(link =>
+        link.id === id ? { ...link, [field]: value } : link
+      )
+    );
+  };
+
+  const generateLinkPreview = () => {
     let baseUrl = `${API_URL}/api/survey/click`;
     let params = [];
 
     dynamicParams.forEach(param => {
-      if (param.key.trim() && param.value.trim()) {
+      if (param.key.trim()) {
+        const value = param.value.trim() || "VALUE";
         params.push(
-          `${encodeURIComponent(param.key)}=${encodeURIComponent(param.value)}`
+          `${encodeURIComponent(param.key)}${value ? '=' + encodeURIComponent(value) : ''}`
         );
       }
     });
 
     params.push(`status=${encodeURIComponent(status)}`);
 
-    const finalUrl = `${baseUrl}?${params.join("&")}`;
+    const finalUrl = `${baseUrl}/LINK_ID?${params.join("&")}`;
     return finalUrl;
   };
 
   useEffect(() => {
-    const link = generateLink();
+    const link = generateLinkPreview();
     setGeneratedLink(link);
   }, [dynamicParams, status]);
 
@@ -121,24 +154,55 @@ const CreateLinks = () => {
       return;
     }
 
+    // Check if at least one parameter is provided
+    const validParams = dynamicParams.filter(p => p.key.trim());
+    
+    if (validParams.length === 0) {
+      showNotification("Please add at least one parameter!", "error");
+      return;
+    }
+
+    // Check if multiple redirects are enabled
+    if (enableMultipleRedirects) {
+      const validRedirects = redirectLinks.filter(link => 
+        link.url.trim() && link.name.trim()
+      );
+      
+      if (validRedirects.length === 0) {
+        showNotification("Please add at least one redirect link with both name and URL", "error");
+        return;
+      }
+    }
+
     try {
+      // Create parameters object
       const parameters = {};
-      dynamicParams.forEach(param => {
-        if (param.key.trim() && param.value.trim()) {
-          parameters[param.key] = param.value;
-        }
+      validParams.forEach(param => {
+        parameters[param.key.trim()] = param.value.trim();
       });
 
+      // Prepare redirect URLs if enabled
+      const redirectData = enableMultipleRedirects 
+        ? redirectLinks
+            .filter(link => link.url.trim() && link.name.trim())
+            .map(link => ({
+              name: link.name.trim(),
+              url: link.url.trim()
+            }))
+        : [];
+
+      // Send data to backend
       const response = await fetch(`${API_URL}/api/surveylink/links`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: linkName,
-          url: generatedLink,
+          name: linkName.trim(),
           status: status,
           parameters: parameters,
+          enableRedirects: enableMultipleRedirects,
+          redirectLinks: redirectData
         })
       });
 
@@ -146,14 +210,14 @@ const CreateLinks = () => {
 
       if (data.success) {
         setLinks([data.data, ...links]);
-        showNotification("Link saved to database!");
+        showNotification("Link created successfully!");
         closeModal();
       } else {
-        showNotification(data.message || "Failed to save link", "error");
+        showNotification(data.message || "Failed to create link", "error");
       }
     } catch (error) {
       console.error("Error saving link:", error);
-      showNotification("Failed to save link to database", "error");
+      showNotification("Failed to create link", "error");
     }
   };
 
@@ -174,7 +238,6 @@ const CreateLinks = () => {
     }
   };
 
-  // Function to delete a link
   const deleteLink = async (linkId) => {
     if (!window.confirm("Are you sure you want to delete this link?")) {
       return;
@@ -199,7 +262,6 @@ const CreateLinks = () => {
     }
   };
 
-  // Function to toggle active/inactive status
   const toggleActiveStatus = async (linkId, currentStatus) => {
     try {
       const response = await fetch(`${API_URL}/api/surveylink/links/${linkId}/toggle-status`, {
@@ -230,6 +292,11 @@ const CreateLinks = () => {
     }
   };
 
+  const showFullUrl = (url) => {
+    setSelectedUrl(url);
+    setShowUrlModal(true);
+  };
+
   const statusOptions = [
     { value: "complete", label: "Complete", color: "#10B981" },
     { value: "terminate", label: "Terminate", color: "#EF4444" },
@@ -239,7 +306,6 @@ const CreateLinks = () => {
   return (
     <DashboardLayout>
       <div className="dynamic-link-builder">
-        {/* Notification Toast */}
         {notification && (
           <div className={`notification ${notification.type}`}>
             {notification.message}
@@ -247,9 +313,10 @@ const CreateLinks = () => {
         )}
 
         <div className="container">
-          {/* Header */}
           <div className="redirect-header">
-            <h1>Redirect Links</h1>
+            <div className="header">
+              <h1>Redirect Links</h1>
+            </div>
             <button className="create-btn" onClick={openModal}>
               <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -258,7 +325,6 @@ const CreateLinks = () => {
             </button>
           </div>
 
-          {/* Table */}
           <div className="table-container">
             {loading ? (
               <div className="loading">
@@ -272,6 +338,7 @@ const CreateLinks = () => {
                     <th>LINK NAME</th>
                     <th>STATUS</th>
                     <th>URL</th>
+                    {/* <th>REDIRECTS</th> */}
                     <th>ACTIONS</th>
                   </tr>
                 </thead>
@@ -293,24 +360,45 @@ const CreateLinks = () => {
                           <label className="switch">
                             <input 
                               type="checkbox" 
-                              checked={link.isActive !== false}
+                              checked={link.isActive}
                               onChange={() => toggleActiveStatus(link._id, link.isActive)}
                             />
                             <span className="slider"></span>
                           </label>
-                          <span className={`status-text ${link.isActive !== false ? 'active' : 'inactive'}`}>
-                            {link.isActive !== false ? 'Active' : 'Inactive'}
+                          <span className={`status-text ${link.isActive ? 'active' : 'inactive'}`}>
+                            {link.isActive ? 'Active' : 'Inactive'}
                           </span>
                         </div>
                       </td>
-                      <td>
-                        <div className="link-cell">
-                          <svg width="18" height="18" fill="none" stroke="#6B7280" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                          </svg>
-                          <span className="link-url">{link.url}</span>
+                      <td className="url-cell">
+                        <div 
+                          className="url-display-container"
+                          onClick={() => showFullUrl(link.url)}
+                          title={link.url}
+                        >
+                          <div className="url-icon">
+                            <svg width="16" height="16" fill="none" stroke="#6B7280" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 005.656-5.656l-1.1 1.1" />
+                            </svg>
+                          </div>
+                          <div className="url-text-container">
+                            <span className="url-text">
+                              {link.url}
+                            </span>
+                          </div>
                         </div>
                       </td>
+                      {/* <td>
+                        {link.enableRedirects && link.redirectLinks && link.redirectLinks.length > 0 ? (
+                          <div className="redirect-count">
+                            <span className="redirect-badge">
+                              {link.redirectLinks.length} redirects
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="no-redirects">No redirects</span>
+                        )}
+                      </td> */}
                       <td>
                         <div className="actions">
                           <button
@@ -360,7 +448,49 @@ const CreateLinks = () => {
           </div>
         </div>
 
-        {/* Modal */}
+        {/* Full URL Modal */}
+        {showUrlModal && (
+          <div className="modal-overlay">
+            <div className="full-url-modal">
+              <div className="full-url-header">
+                <h3>Full URL</h3>
+                <button className="close-btn" onClick={() => setShowUrlModal(false)}>
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="full-url-content">
+                <pre className="full-url-text">{selectedUrl}</pre>
+              </div>
+              
+              <div className="full-url-actions">
+                <button
+                  className="full-url-copy-btn"
+                  onClick={() => {
+                    navigator.clipboard.writeText(selectedUrl);
+                    showNotification("URL copied to clipboard!");
+                    setShowUrlModal(false);
+                  }}
+                >
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Copy URL
+                </button>
+                <button
+                  className="full-url-close-btn"
+                  onClick={() => setShowUrlModal(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Create Link Modal */}
         {showModal && (
           <div className="modal-overlay">
             <div className="modal">
@@ -373,25 +503,29 @@ const CreateLinks = () => {
                 </button>
               </div>
 
-              {/* Link Name */}
               <div className="form-group">
-                <label className="label">Link Name</label>
+                <label className="label">
+                  Link Name <span className="required">*</span>
+                </label>
                 <input
                   type="text"
                   className="input"
                   value={linkName}
                   onChange={(e) => setLinkName(e.target.value)}
                   placeholder="e.g., Facebook Campaign - Summer 2024"
+                  required
                 />
               </div>
 
-              {/* Status Selection */}
               <div className="form-group">
-                <label className="label">Status</label>
+                <label className="label">
+                  Status <span className="required">*</span>
+                </label>
                 <div className="status-options">
                   {statusOptions.map(option => (
                     <button
                       key={option.value}
+                      type="button"
                       className={`status-btn ${status === option.value ? 'active' : ''}`}
                       onClick={() => setStatus(option.value)}
                       style={{
@@ -406,27 +540,31 @@ const CreateLinks = () => {
                 </div>
               </div>
 
-              {/* Dynamic Parameters */}
               <div className="form-group">
-                <h3 className="label">Dynamic Parameters</h3>
+                <h3 className="label">
+                  Dynamic Parameters <span className="required">*</span>
+                </h3>
+                <small className="help-text">
+                  Add at least one parameter. You can add any parameters you want (pid, uid, etc. are not required).
+                </small>
 
-                {/* Add New Parameter */}
                 <div className="param-inputs">
                   <input
                     type="text"
-                    placeholder="Key (e.g., campaign_id)"
+                    placeholder="Key (e.g., campaign_id, pid, uid, etc.)"
                     value={newParam.key}
                     onChange={(e) => setNewParam({...newParam, key: e.target.value})}
                     className="param-input"
                   />
                   <input
                     type="text"
-                    placeholder="Value (e.g., 12345)"
+                    placeholder="Value (optional)"
                     value={newParam.value}
                     onChange={(e) => setNewParam({...newParam, value: e.target.value})}
                     className="param-input"
                   />
                   <button
+                    type="button"
                     className="action-btn copy-btn"
                     onClick={addParam}
                   >
@@ -434,7 +572,6 @@ const CreateLinks = () => {
                   </button>
                 </div>
 
-                {/* Parameter List */}
                 <div className="param-list">
                   {dynamicParams.map(param => (
                     <div key={param.id} className="param-item">
@@ -443,15 +580,18 @@ const CreateLinks = () => {
                         className="param-input"
                         value={param.key}
                         onChange={(e) => updateParam(param.id, "key", e.target.value)}
+                        placeholder="Key"
                       />
-                      <span style={{ color: "#6B7280", fontWeight: "600" }}>=</span>
+                      <span className="equals-sign">=</span>
                       <input
                         type="text"
                         className="param-input"
                         value={param.value}
                         onChange={(e) => updateParam(param.id, "value", e.target.value)}
+                        placeholder="Value"
                       />
                       <button
+                        type="button"
                         className="delete-param-btn"
                         onClick={() => removeParam(param.id)}
                       >
@@ -464,19 +604,88 @@ const CreateLinks = () => {
                 </div>
               </div>
 
-              {/* Generated Link Display */}
-              {generatedLink && (
-                <div className="generated-link">
-                  <h4>Generated Link Preview:</h4>
-                  <div className="link-preview">
-                    {generatedLink}
-                  </div>
+              <div className="form-group">
+                <div className="toggle-group">
+                  <label className="toggle-label">
+                    <span className="toggle-text">Add Multiple Redirect Links</span>
+                    <label className="switch">
+                      <input 
+                        type="checkbox" 
+                        checked={enableMultipleRedirects}
+                        onChange={() => setEnableMultipleRedirects(!enableMultipleRedirects)}
+                      />
+                      <span className="slider"></span>
+                    </label>
+                  </label>
+                  <small className="help-text">
+                    Enable to add multiple URLs where users will be redirected after completing the survey
+                  </small>
                 </div>
-              )}
 
-              {/* Save Button */}
+                {enableMultipleRedirects && (
+                  <div className="redirect-links-section">
+                    <h4 className="section-title">Redirect Links</h4>
+                    <small className="help-text">
+                      Add URLs where users will be redirected. At least one redirect link is required.
+                    </small>
+                    
+                    {redirectLinks.map((link) => (
+                      <div key={link.id} className="redirect-link-item">
+                        <div className="redirect-inputs">
+                          <input
+                            type="text"
+                            className="redirect-input"
+                            placeholder="Redirect Name (e.g., Thank You Page)"
+                            value={link.name}
+                            onChange={(e) => updateRedirectLink(link.id, "name", e.target.value)}
+                          />
+                          <input
+                            type="url"
+                            className="redirect-input"
+                            placeholder="Redirect URL (e.g., https://example.com/thank-you)"
+                            value={link.url}
+                            onChange={(e) => updateRedirectLink(link.id, "url", e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            className="delete-redirect-btn"
+                            onClick={() => removeRedirectLink(link.id)}
+                            disabled={redirectLinks.length === 1}
+                          >
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      className="add-redirect-btn"
+                      onClick={addRedirectLink}
+                    >
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add Another Redirect Link
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="generated-link">
+                <h4>Generated Link Preview:</h4>
+                <div className="link-preview">
+                  {generatedLink}
+                </div>
+                <small className="help-text">
+                  LINK_ID will be replaced with actual ID when saved. Users will see VALUE in parameters.
+                </small>
+              </div>
+
               <button className="save-btn" onClick={saveLinkToDB}>
-                Save Link
+                Create Link
               </button>
             </div>
           </div>
