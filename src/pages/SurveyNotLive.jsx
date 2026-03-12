@@ -7,7 +7,8 @@ const SurveyNotLive = () => {
       <div className="survey-not-live-card">
         <header className="survey-header">
           <h1 className="company-name">MIXATS Group</h1>
-          <div className="status-badge">
+          <div className="status-badge">This survey link is no longer active.
+Please contact the administrator.
             <span className="status-text">Wait! Not Live</span>
           </div>
         </header>

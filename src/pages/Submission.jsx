@@ -14,6 +14,8 @@ export default function SurveyResponses() {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [surveyName,setSurveyName] = useState('')
+    const [surveyInternalID,setInternalID] = useState('')
+    const [surveyClientID,setClientID] = useState('')
     const navigate = useNavigate();
     const surveyId = window.location.pathname.split("/").pop();
     const API_URL = import.meta.env.VITE_API_URL;
@@ -25,6 +27,8 @@ export default function SurveyResponses() {
                 const surveyData = surveyRes.data.data;
                 console.log(surveyData);
                 setSurveyName(surveyData.surveyName)
+                setInternalID(surveyData.projectIDfromInter)
+                setClientID(surveyData.projectIDfromClient)
                 setQuestions(surveyData.questions || []);
 
                 const submissionRes = await axios.get(
@@ -41,87 +45,105 @@ export default function SurveyResponses() {
     }, []);
 
     // Prepare export data
-    const prepareExportData = () => {
-        return submissions.map((s, index) => {
-            const row = {
-                "Sr No.": index + 1,
-            };
+   const prepareExportData = () => {
+    return submissions.map((s, index) => {
+        const row = {
+            "Sr No.": index + 1,
+            "Survey Name": surveyName,
+            "Internal ID": surveyInternalID,
+            "Client ID": surveyClientID,
+        };
 
-            questions.forEach((q) => {
-                const ans = s.responses.find((r) => r.questionId === q._id);
-                row[q.questionText] = ans ? ans.answer : "-";
-            });
-
-            row["Submitted At"] = new Date(s.submittedAt).toLocaleString();
-            return row;
+        questions.forEach((q) => {
+            const ans = s.responses.find((r) => r.questionId === q._id);
+            row[q.questionText] = ans ? ans.answer : "-";
         });
-    };
+
+        row["Submitted At"] = new Date(s.submittedAt).toLocaleString();
+
+        return row;
+    });
+};
+
 
     // Export to Excel
-    const exportToExcel = () => {
-        const data = prepareExportData();
-        const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Survey Responses");
+   const exportToExcel = () => {
+    const data = prepareExportData();
+    if (!data.length) return;
 
-        const maxWidth = 50;
-        const colWidths = Object.keys(data[0] || {}).map((key) => ({
-            wch: Math.min(maxWidth, Math.max(key.length, 10)),
-        }));
-        ws["!cols"] = colWidths;
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Survey Responses");
 
-        XLSX.writeFile(wb, `survey_responses_${surveyId}.xlsx`);
-    };
+    XLSX.writeFile(wb, `survey_responses_${surveyId}.xlsx`);
+};
 
     // Export to CSV
-    const exportToCSV = () => {
-        const data = prepareExportData();
-        const ws = XLSX.utils.json_to_sheet(data);
-        const csv = XLSX.utils.sheet_to_csv(ws);
+  const exportToCSV = () => {
+    const data = prepareExportData();
+    if (!data.length) return;
 
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `survey_responses_${surveyId}.csv`;
-        link.click();
-    };
+    const ws = XLSX.utils.json_to_sheet(data);
+    const csv = XLSX.utils.sheet_to_csv(ws);
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `survey_responses_${surveyId}.csv`;
+    link.click();
+};
+
 
     // Export to PDF
-    const exportToPDF = () => {
-        const doc = new jsPDF("l", "mm", "a4");
+  const exportToPDF = () => {
+    const doc = new jsPDF("l", "mm", "a4");
 
-        doc.setFontSize(16);
-        doc.text("Survey Responses", 14, 15);
-        doc.setFontSize(10);
-        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
+    doc.setFontSize(16);
+    doc.text("Survey Responses", 14, 15);
 
-        const headers = [
-            "Sr No.",
-            ...questions.map((q) => q.questionText),
-            "Submitted At",
+    doc.setFontSize(10);
+    doc.text(`Survey Name: ${surveyName}`, 14, 22);
+    doc.text(`Internal ID: ${surveyInternalID}`, 14, 27);
+    doc.text(`Client ID: ${surveyClientID}`, 14, 32);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 37);
+
+    const headers = [
+        "Sr No.",
+        "Survey Name",
+        "Internal ID",
+        "Client ID",
+        ...questions.map((q) => q.questionText),
+        "Submitted At",
+    ];
+
+    const rows = submissions.map((s, index) => {
+        const row = [
+            index + 1,
+            surveyName,
+            surveyInternalID,
+            surveyClientID,
         ];
 
-        const rows = submissions.map((s, index) => {
-            const row = [index + 1];
-
-            questions.forEach((q) => {
-                const ans = s.responses.find((r) => r.questionId === q._id);
-                row.push(ans ? ans.answer : "-");
-            });
-
-            row.push(new Date(s.submittedAt).toLocaleString());
-            return row;
+        questions.forEach((q) => {
+            const ans = s.responses.find((r) => r.questionId === q._id);
+            row.push(ans ? ans.answer : "-");
         });
 
-        autoTable(doc, {
-            head: [headers],
-            body: rows,
-            startY: 28,
-            styles: { fontSize: 8, cellPadding: 2 },
-        });
+        row.push(new Date(s.submittedAt).toLocaleString());
 
-        doc.save(`survey_responses_${surveyId}.pdf`);
-    };
+        return row;
+    });
+
+    autoTable(doc, {
+        head: [headers],
+        body: rows,
+        startY: 42,
+        styles: { fontSize: 8, cellPadding: 2 },
+    });
+
+    doc.save(`survey_responses_${surveyId}.pdf`);
+};
+
 
     if (loading) return <p className="submission-loading">Loading...</p>;
     if (!questions.length) return <p className="submission-no-data">No questions found</p>;
@@ -177,6 +199,8 @@ export default function SurveyResponses() {
                             <tr>
                                 <th className="submission-header">Sr No.</th>
                                 <th className="submission-header">Survey Name</th>
+                                <th className="submission-header">Internal ID</th>
+                                <th className="submission-header">Client ID</th>
 
                                 {questions.map((q) => (
                                     <th key={q._id} className="submission-header">
@@ -201,7 +225,10 @@ export default function SurveyResponses() {
                                             {(currentPage - 1) * rowsPerPage + index + 1}
                                         </td>
                                         <td className="submission-cell">
-                                            {surveyName}
+                                            {surveyInternalID}
+                                        </td>
+                                        <td className="submission-cell">
+                                            {surveyClientID}
                                         </td>
 
                                         {questions.map((q) => {

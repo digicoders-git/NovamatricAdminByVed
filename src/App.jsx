@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import Login from "./pages/Login";
 import Surveys from "./pages/Surveys";
@@ -21,6 +21,32 @@ import CreateLinks from "./pages/CreateLinks";
 
 export default function App() {
   const [auth, setAuth] = useState(Boolean(localStorage.getItem("admin")));
+
+  const logout = useCallback(() => {
+    localStorage.removeItem("admin");
+    setAuth(false);
+  }, []);
+
+  useEffect(() => {
+    if (!auth) return;
+
+    let timeoutId;
+
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(logout, 1800000); // 30 minutes
+    };
+
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+
+    events.forEach(event => window.addEventListener(event, resetTimer));
+    resetTimer(); // Initialize timer
+
+    return () => {
+      events.forEach(event => window.removeEventListener(event, resetTimer));
+      clearTimeout(timeoutId);
+    };
+  }, [auth, logout]);
 
   return (
     <BrowserRouter>

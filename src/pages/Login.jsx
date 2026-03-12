@@ -1,3 +1,4 @@
+// Login.jsx - Updated component
 import { useState } from "react";
 import { loginAdmin } from "../api/apiClient";
 import "./Login.css";
@@ -7,7 +8,8 @@ export default function Login({ setAuth }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const API_URL = import.meta.env.VITE_API_URL;
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleLogin = async () => {
     setError("");
@@ -21,6 +23,10 @@ export default function Login({ setAuth }) {
         return;
       }
 
+      if (rememberMe) {
+        localStorage.setItem("rememberedUser", username);
+      }
+
       localStorage.setItem("admin", JSON.stringify(res.data.admin));
       setAuth(true);
     } catch (e) {
@@ -31,123 +37,127 @@ export default function Login({ setAuth }) {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && username && password) {
       handleLogin();
     }
   };
 
   return (
     <div className="login-container">
-      <div className="login-card-horizontal">
-        {/* Left Side - Branding */}
-        <div className="brand-section">
-          {/* <div className="logo-container"> */}
-            <img 
-              src="/logo.png" 
-              alt="Company Logo" 
-              className="company-logo"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'flex';
-              }}
-            />
-            <div className="logo-placeholder">
-              <span>🏢</span>
+      <div className="login-card-modern">
+        {/* Left Side - Hero Section */}
+        <div className="hero-section">
+          <div className="hero-content">
+            <div className="company-badge">
+              {/* <div className="company-logo-wrapper">
+                <span role="img" aria-label="logo"></span>
+              </div> */}
+              <img src="/logo.png" alt="" />
             </div>
-          {/* </div> */}
-          <div className="brand-content">
-            {/* <h1 className="company-name">Novametric Research</h1> */}
-            <p className="brand-tagline">Welcome to the Admin Portal</p>
-            <div className="brand-features">
-              <div className="feature-item">
-                <span className="feature-icon">🔒</span>
-                <span>Secure Access</span>
+
+            <h1 className="hero-title">
+              Welcome to <span>Admin</span> Portal
+            </h1>
+
+            <p className="hero-description">
+              Manage your research team, track projects, and monitor performance all in one place.
+            </p>
+
+            <div className="stats-container">
+              <div className="stat-item">
+                <span className="stat-value">🔒</span>
+                <span className="stat-label">Secure Access</span>
               </div>
-              <div className="feature-item">
-                <span className="feature-icon">⚡</span>
-                <span>Fast & Reliable</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-icon">👥</span>
-                <span>Team Management</span>
+              <div className="stat-item">
+                <span className="stat-value">⚡</span>
+                <span className="stat-label">Fast & Reliable</span>
               </div>
             </div>
-          </div>
-          <div className="brand-footer">
-            <br />
-            <p>&copy; 2026 Novametric Research. All rights reserved.</p>
           </div>
         </div>
 
         {/* Right Side - Login Form */}
-        <div className="form-section-horizontal">
-          <div className="form-header">
-            <h2>Welcome Back</h2>
-            <p className="login-subtitle">Sign in to your admin account</p>
+        <div className="login-section">
+          <div className="login-header">
+            <span className="welcome-back">Welcome back</span>
+            <h2>Sign in</h2>
+            <p>Enter your credentials to access your account</p>
           </div>
 
           {error && (
-            <div className="error-message">
-              <span className="error-icon">⚠️</span>
+            <div className="error-message-modern">
+              <span className="error-icon-modern">⚠️</span>
               {error}
             </div>
           )}
 
-          <div className="input-group">
+          <div className="form-group">
             <label htmlFor="username">Username</label>
-            <input
-              id="username"
-              type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className={error ? "error-input" : ""}
-              disabled={isLoading}
-            />
+            <div className="input-wrapper">
+              <span className="input-icon">👤</span>
+              <input
+                id="username"
+                type="text"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className={error ? "error" : ""}
+                disabled={isLoading}
+              />
+            </div>
           </div>
 
-          <div className="input-group">
+          <div className="form-group">
             <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className={error ? "error-input" : ""}
-              disabled={isLoading}
-            />
+            <div className="input-wrapper">
+              <span className="input-icon">🔒</span>
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className={error ? "error" : ""}
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex="-1"
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
           </div>
 
-          {/* <div className="form-options">
-            <label className="remember-me">
-              <input type="checkbox" />
-              <span className="checkmark"></span>
-              Remember me
-            </label>
-            <a href="#" className="forgot-password">Forgot password?</a>
-          </div> */}
+          <div className="form-options-modern">
+            {/* <a href="#" className="forgot-link">Forgot password?</a> */}
+          </div>
 
           <button 
             onClick={handleLogin} 
             disabled={isLoading || !username || !password}
-            className={`login-button ${isLoading ? 'loading' : ''}`}
+            className="login-btn"
           >
             {isLoading ? (
               <>
-                <div className="spinner"></div>
-                Signing In...
+                <div className="spinner-modern"></div>
+                Signing in...
               </>
             ) : (
               'Sign In'
             )}
           </button>
 
-          {/* <div className="login-footer">
-            <p>Need help? <a href="#" className="support-link">Contact Support</a></p>
-          </div> */}
+          <div className="login-footer-modern">
+            {/* <p>Need help?<a href="mailto:sp@novametricresearch.com"> Contact Support</a></p> */}
+            <p style={{ fontSize: '12px', marginTop: '10px' }}>
+              © 2026 Novametric Research. All rights reserved.
+            </p>
+          </div>
         </div>
       </div>
     </div>

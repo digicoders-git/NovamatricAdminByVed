@@ -36,7 +36,7 @@ const TotalClick = () => {
       );
 
       const data = await response.json();
-      console.log(data);
+
       
       if (data.success) {
         setSurveys(data.data || []);
@@ -202,7 +202,7 @@ const TotalClick = () => {
               ${surveys.map((survey, index) => `
                 <tr>
                   <td>${index + 1}</td>
-                  <td>${survey?.dynamicFields?.uid  || ""}</td>
+                  <td>${survey?.userId?.uid  || ""}</td>
                   <td>${survey?.dynamicFields.pid  || ""}</td>
                   <td>${survey.ipaddress}</td>
                   <td>
